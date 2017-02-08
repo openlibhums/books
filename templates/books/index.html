@@ -1,6 +1,4 @@
 {% extends "core/base.html" %}
-{% load bootstrap3 %}
-
 
 {% block page_title %}Books{% endblock %}
 
@@ -8,4 +6,40 @@
 {% endblock %}
 
 {% block body %}
+    <section class="content">
+        <div class="row">
+            <h4>Published Books</h4>
+
+            {% for book in books %}
+                <div class="box journal">
+                    <div class="row collapse">
+                        <div class="large-12 columns">
+                            <div class="content clearfix">
+                                <div class="large-2 columns">
+                                    <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
+                                </div>
+                                <div class="large-7 columns">
+                                    <h2>{{ book.full_title }}</h2>
+                                    <h6>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</h6>
+                                    {{ book.description|safe|linebreaksbr }}
+                                </div>
+                                <div class="large-3 columns">
+                                    <h6>About this Book</h6>
+                                    <strong>Published</strong> {{ book.date_published }}<br /><br />
+                                    <strong>Published by</strong> {{ book.publisher_name }}<br /><br />
+                                    {% if book.pages %}<strong>Pages</strong> {{ book.pages }}<br /><br />{% endif %}
+                                    {% if book.isbn %}<strong>ISBN</strong> {{ book.isbn }}<br /><br />{% endif %}
+                                    {% if book.doi %}<strong>DOI</strong> {{ book.doi}}<br /><br />{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>There are no published books to display.</p>
+            {% endfor %}
+        </div>
+
+    </section>
+
 {% endblock body %}

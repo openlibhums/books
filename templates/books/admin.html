@@ -1,0 +1,13 @@
+{% extends "core/admin/base.html" %}
+
+{% block title %}Books Admin{% endblock title %}
+{% block admin-header %}Books Admin{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+{% endblock %}
+
+
+{% block body %}
+{% endblock body %}
