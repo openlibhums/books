@@ -26,7 +26,6 @@ class Book(models.Model):
     description = models.TextField()
     pages = models.PositiveIntegerField()
 
-    contributors = models.ManyToManyField(Contributor)
     is_edited_volume = models.BooleanField(default=False)
 
     publisher_name = models.CharField(max_length=100)
@@ -41,6 +40,7 @@ class Book(models.Model):
 
 
 class Contributor(models.Model):
+    book = models.ForeignKey(Book)
     first_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100)
