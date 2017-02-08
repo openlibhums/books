@@ -33,6 +33,12 @@ class Book(models.Model):
     publisher_loc = models.CharField(max_length=100)
     cover = models.FileField(upload_to=cover_images_upload_path, null=True, blank=True, storage=fs)
 
+    doi = models.CharField(max_length=200)
+    isbn = models.CharField(max_length=30)
+
+    def __str__(self):
+        return self.title
+
 
 class Contributor(models.Model):
     first_name = models.CharField(max_length=100)
@@ -43,10 +49,19 @@ class Contributor(models.Model):
     email = models.EmailField(blank=True, null=True)
     sequence = models.PositiveIntegerField(default=10)
 
+    def __str__(self):
+        if not self.middle_name:
+            return "{0} {1}".format(self.first_name, self.last_name)
+        else:
+            return "{0} {1} {2}".format(self.fist_name, self.middle_name, self.last_name)
+
 
 class Format(models.Model):
-    format = models.ForeignKey(Book)
+    book = models.ForeignKey(Book)
 
     title = models.CharField(max_length=100)
     filename = models.CharField(max_length=100)
     sequence = models.PositiveIntegerField(default=10)
+
+    def __str__(self):
+        return self.title
