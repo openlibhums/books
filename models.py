@@ -49,6 +49,13 @@ class Book(models.Model):
         else:
             return self.title
 
+    def first_contributor(self):
+        contributors = self.contributor_set.all()
+        if contributors:
+            return contributors[0]
+        else:
+            return 'No Authors'
+
 
 class Contributor(models.Model):
     book = models.ForeignKey(Book)

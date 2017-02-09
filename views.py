@@ -1,7 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.core.urlresolvers import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 
-from plugins.books import models
+from plugins.books import models, forms
 
 
 def index(request):
@@ -44,6 +45,29 @@ def admin(request):
     template = 'books/admin.html'
     context = {
         'books': books,
+    }
+
+    return render(request, template, context)
+
+
+@staff_member_required
+def edit_book(request, book_id):
+
+    book = get_object_or_404(models.Book, pk=book_id)
+    form = forms.BookForm(instance=book)
+
+    if request.POST:
+        form = forms.BookForm(request.POST, instance=book)
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(reverse('books_admin'))
+
+    template = 'books/edit_book.html'
+    context = {
+        'book': book,
+        'form': form,
     }
 
     return render(request, template, context)

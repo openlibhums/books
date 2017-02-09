@@ -1,7 +1,6 @@
 {% extends "core/admin/base.html" %}
 
 {% block title %}Books Admin{% endblock title %}
-{% block admin-header %}Books Admin{% endblock %}
 
 {% block breadcrumbs %}
     {{ block.super }}
@@ -10,4 +9,35 @@
 
 
 {% block body %}
+    <div class="large-12 columns">
+        <h4>Books</h4>
+        <table id="books">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>First Author</th>
+                    <th>ISBN</th>
+                    <th>DOI</th>
+                    <th>Date Published</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for book in books %}
+                <tr>
+                    <td><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></td>
+                    <td>{{ book.first_contributor }}</td>
+                    <td>{{ book.isbn }}</td>
+                    <td>{{ book.doi }}</td>
+                    <td>{{ book.date_published|date:"Y-m-d" }}</td>
+                </tr>
+            {% empty %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 {% endblock body %}
+
+{% block js %}
+    {% include "elements/datatables.html" with target="#books" %}
+{% endblock js %}

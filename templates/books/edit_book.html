@@ -1,0 +1,19 @@
+{% extends "core/admin/base.html" %}
+{% load foundation %}
+
+{% block title %}Books Admin{% endblock title %}
+{% block admin-header %}Books Admin{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+{% endblock %}
+
+
+{% block body %}
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|foundation }}
+        <button type="submit" name="save" class="success button">Save Book</button>
+    </form>
+{% endblock body %}
