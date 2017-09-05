@@ -33,8 +33,8 @@ class Book(models.Model):
     publisher_loc = models.CharField(max_length=100)
     cover = models.FileField(upload_to=cover_images_upload_path, null=True, blank=True, storage=fs)
 
-    doi = models.CharField(max_length=200, blank=True, null=True)
-    isbn = models.CharField(max_length=30, blank=True, null=True)
+    doi = models.CharField(max_length=200, blank=True, null=True, verbose_name='DOI')
+    isbn = models.CharField(max_length=30, blank=True, null=True, verbose_name='ISBN')
 
     def __str__(self):
         return self.title

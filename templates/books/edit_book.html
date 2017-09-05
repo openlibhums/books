@@ -1,4 +1,4 @@
-{% extends "core/admin/base.html" %}
+{% extends "admin/core/base.html" %}
 {% load foundation %}
 
 {% block title %}Books Admin{% endblock title %}
@@ -11,9 +11,26 @@
 
 
 {% block body %}
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form|foundation }}
-        <button type="submit" name="save" class="success button">Save Book</button>
-    </form>
+    <div class="box">
+        <div class="row expanded">
+            <div class="large-6 columns">
+                <div class="title-area">
+                    <h2>Edit Book Details</h2>
+                </div>
+                <div class="content">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|foundation }}
+                        <button type="submit" name="save" class="success button">Save Book</button>
+                    </form>
+                </div>
+            </div>
+            <div class="large-6 columns">
+                <div class="title-area">
+                    <h2>Authors and Formats</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
 {% endblock body %}
