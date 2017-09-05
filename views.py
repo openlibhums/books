@@ -17,9 +17,9 @@ def index(request):
     return render(request, template, context)
 
 
-def book(request, book_id):
+def view_book(request, book_id):
 
-    book = get_object_or_404(models.Book, pk=book_id)
+    book = get_object_or_404(models.Book, pk=book_id, date_published__isnull=False)
 
     template = 'books/book.html'
     context = {
@@ -31,7 +31,7 @@ def book(request, book_id):
 
 def download_format(request, book_id, format_id):
 
-    book = get_object_or_404(models.Book, pk=book_id)
+    book = get_object_or_404(models.Book, pk=book_id, date_published__isnull=False)
     format = get_object_or_404(models.Format, pk=format_id, book=book)
 
     # Handle serving the file here
