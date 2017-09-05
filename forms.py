@@ -13,3 +13,17 @@ class BookForm(forms.ModelForm):
         widgets = {
             'description': SummernoteWidget()
         }
+
+
+class ContributorForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Contributor
+        exclude = ('book',)
+
+
+class FormatForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Format
+        exclude = ('book', 'filename')
