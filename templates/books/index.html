@@ -10,26 +10,7 @@
             {% for book in books %}
                 <div class="box journal">
                     <div class="row collapse">
-                        <div class="large-12 columns">
-                            <div class="content clearfix">
-                                <div class="large-2 columns">
-                                    <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
-                                </div>
-                                <div class="large-7 columns">
-                                    <a href="{% url 'books_book' book.pk %}"><h2>{{ book.full_title }}</h2></a>
-                                    <h6>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</h6>
-                                    {{ book.description|safe|linebreaksbr }}
-                                </div>
-                                <div class="large-3 columns">
-                                    <h6>About this Book</h6>
-                                    <strong>Published</strong> {{ book.date_published }}<br /><br />
-                                    <strong>Published by</strong> {{ book.publisher_name }}<br /><br />
-                                    {% if book.pages %}<strong>Pages</strong> {{ book.pages }}<br /><br />{% endif %}
-                                    {% if book.isbn %}<strong>ISBN</strong> {{ book.isbn }}<br /><br />{% endif %}
-                                    {% if book.doi %}<strong>DOI</strong> <a href="https://doi.org/{{ book.doi }}">{{ book.doi }}</a><br /><br />{% endif %}
-                                </div>
-                            </div>
-                        </div>
+                        {% include "books/book_detail.html" with book=book %}
                     </div>
                 </div>
             {% empty %}
