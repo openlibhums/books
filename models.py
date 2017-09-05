@@ -33,8 +33,10 @@ class Book(models.Model):
     publisher_loc = models.CharField(max_length=100, verbose_name='Publisher location')
     cover = models.FileField(upload_to=cover_images_upload_path, null=True, blank=True, storage=fs)
 
-    doi = models.CharField(max_length=200, blank=True, null=True, verbose_name='DOI')
+    doi = models.CharField(max_length=200, blank=True, null=True, verbose_name='DOI', help_text='10.xxx/1234')
     isbn = models.CharField(max_length=30, blank=True, null=True, verbose_name='ISBN')
+
+    purchase_url = models.URLField(null=True, blank=True)
 
     def __str__(self):
         return self.title

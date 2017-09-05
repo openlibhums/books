@@ -26,7 +26,7 @@
                                     <strong>Published by</strong> {{ book.publisher_name }}<br /><br />
                                     {% if book.pages %}<strong>Pages</strong> {{ book.pages }}<br /><br />{% endif %}
                                     {% if book.isbn %}<strong>ISBN</strong> {{ book.isbn }}<br /><br />{% endif %}
-                                    {% if book.doi %}<strong>DOI</strong> {{ book.doi}}<br /><br />{% endif %}
+                                    {% if book.doi %}<strong>DOI</strong> <a href="https://doi.org/{{ book.doi }}">{{ book.doi }}</a><br /><br />{% endif %}
                                 </div>
                             </div>
                         </div>
