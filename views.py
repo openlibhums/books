@@ -16,6 +16,7 @@ def index(request):
 
     return render(request, template, context)
 
+
 def book(request, book_id):
 
     book = get_object_or_404(models.Book, pk=book_id)
@@ -51,13 +52,17 @@ def admin(request):
 
 
 @staff_member_required
-def edit_book(request, book_id):
+def edit_book(request, book_id=None):
 
-    book = get_object_or_404(models.Book, pk=book_id)
+    book = None
+
+    if book_id:
+        book = get_object_or_404(models.Book, pk=book_id)
+
     form = forms.BookForm(instance=book)
 
     if request.POST:
-        form = forms.BookForm(request.POST, instance=book)
+        form = forms.BookForm(request.POST, request.FILES, instance=book)
 
         if form.is_valid():
             form.save()

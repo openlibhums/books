@@ -10,9 +10,13 @@
 
 {% block body %}
     <div class="large-12 columns">
-        <h4>Books</h4>
-        <table id="books">
-            <thead>
+        <div class="box">
+            <div class="title-area">
+                <h2>Books</h2>
+                <a href="{% url 'books_new_book' %}" class="button"><i class="fa fa-plus">&nbsp;</i>Add New Book</a>
+            </div>
+            <table id="books">
+                <thead>
                 <tr>
                     <th>Title</th>
                     <th>First Author</th>
@@ -20,20 +24,21 @@
                     <th>DOI</th>
                     <th>Date Published</th>
                 </tr>
-            </thead>
-            <tbody>
-            {% for book in books %}
-                <tr>
-                    <td><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></td>
-                    <td>{{ book.first_contributor }}</td>
-                    <td>{{ book.isbn }}</td>
-                    <td>{{ book.doi }}</td>
-                    <td>{{ book.date_published|date:"Y-m-d" }}</td>
-                </tr>
-            {% empty %}
-            {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></td>
+                        <td>{{ book.first_contributor }}</td>
+                        <td>{{ book.isbn }}</td>
+                        <td>{{ book.doi }}</td>
+                        <td>{{ book.date_published|date:"Y-m-d" }}</td>
+                    </tr>
+                    {% empty %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
 {% endblock body %}
