@@ -1,9 +1,6 @@
 {% extends "core/base.html" %}
 
-{% block page_title %}Books{% endblock %}
-
-{% block css %}
-{% endblock %}
+{% block title %}Books{% endblock %}
 
 {% block body %}
     <section class="content">
@@ -19,7 +16,7 @@
                                     <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
                                 </div>
                                 <div class="large-7 columns">
-                                    <h2>{{ book.full_title }}</h2>
+                                    <a href="{% url 'books_book' book.pk %}"><h2>{{ book.full_title }}</h2></a>
                                     <h6>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %}, {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</h6>
                                     {{ book.description|safe|linebreaksbr }}
                                 </div>
