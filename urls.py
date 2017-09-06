@@ -10,4 +10,9 @@ urlpatterns = [
     url(r'^admin/$', views.admin, name='books_admin'),
     url(r'^admin/new/$', views.edit_book, name='books_new_book'),
     url(r'^admin/edit/(?P<book_id>\d+)/$', views.edit_book, name='books_edit_book'),
+    url(r'^admin/edit/(?P<book_id>\d+)/contributor/$', views.edit_contributor, name='books_new_contributor'),
+    url(r'^admin/edit/(?P<book_id>\d+)/contributor/(?P<contributor_id>\d+)$', views.edit_contributor,
+        name='books_edit_contributor'),
+    url(r'^admin/edit/(?P<book_id>\d+)/format/$', views.edit_format, name='books_new_format'),
+    url(r'^admin/edit/(?P<book_id>\d+)/format/(?P<format_id>\d+)/$', views.edit_format, name='books_edit_format'),
 ]

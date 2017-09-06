@@ -29,6 +29,7 @@
             <div class="large-6 columns">
                 <div class="title-area">
                     <h2>Contributors</h2>
+                    {% if book %}<a href="{% url 'books_new_contributor' book.pk %}" class="button"><i class="fa fa-user-plus">&nbsp;</i>Add Contributor</a>{% endif %}
                 </div>
                 <div class="content">
                     <ul class="list-group">
@@ -45,6 +46,7 @@
                 </div>
                 <div class="title-area">
                     <h2>Formats</h2>
+                    {% if book %}<a href="{% url 'books_new_format' book.pk %}" class="button"><i class="fa fa-book">&nbsp;</i>Add Format</a>{% endif %}
                 </div>
                 <div class="content">
                     <ul class="list-group">

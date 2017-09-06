@@ -76,3 +76,11 @@ def edit_book(request, book_id=None):
     }
 
     return render(request, template, context)
+
+
+def edit_contributor(request, book_id, contributor=None):
+    pass
+
+
+def edit_format(request, book_id, format=None):
+    pass
