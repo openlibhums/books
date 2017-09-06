@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 
-from plugins.books import models, forms
+from plugins.books import models, forms, files
 
 
 def index(request):
@@ -35,7 +35,7 @@ def download_format(request, book_id, format_id):
     format = get_object_or_404(models.Format, pk=format_id, book=book)
 
     # Handle serving the file here
-    pass
+    return files.serve_book_file(format)
 
 
 @staff_member_required
@@ -84,7 +84,7 @@ def edit_contributor(request, book_id, contributor_id=None):
     book = get_object_or_404(models.Book, pk=book_id)
 
     if contributor_id:
-        contributor = get_object_or_404(models.Contributor, pk=contributor_id, book__pk=book_id)
+        contributor = get_object_or_404(models.Contributor, pk=contributor_id, book=book)
 
     form = forms.ContributorForm(instance=contributor, book=book)
 
@@ -109,4 +109,30 @@ def edit_contributor(request, book_id, contributor_id=None):
 
 
 def edit_format(request, book_id, format_id=None):
-    pass
+
+    book_format = None
+    book = get_object_or_404(models.Book, pk=book_id)
+
+    if format_id:
+        book_format = get_object_or_404(models.Format, pk=format_id, book=book)
+
+    form = forms.FormatForm(instance=book_format)
+
+    if request.POST:
+        form = forms.FormatForm(request.POST, request.FILES, instance=book_format)
+        if form.is_valid():
+            form_format = form.save(commit=False)
+            form_format.book = book
+            form_format.save()
+
+            return redirect(reverse('books_edit_book', kwargs={'book_id': book.pk}))
+
+    template = 'books/edit_format.html'
+    context = {
+        'book': book,
+        'format': book_format,
+        'form': form,
+    }
+
+    return render(request, template, context)
+

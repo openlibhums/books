@@ -2,7 +2,7 @@ from django import forms
 
 from django_summernote.widgets import SummernoteWidget
 
-from plugins.books import models
+from plugins.books import models, files
 
 
 class BookForm(forms.ModelForm):
@@ -30,6 +30,25 @@ class ContributorForm(forms.ModelForm):
 
 class FormatForm(forms.ModelForm):
 
+    file = forms.FileField(required=True)
+
     class Meta:
         model = models.Format
         exclude = ('book', 'filename')
+
+    def save(self, commit=True, *args, **kwargs):
+        save_format = super(FormatForm, self).save(commit=False)
+        file = self.cleaned_data["file"]
+        filename = files.save_file_to_disk(file, save_format)
+        save_format.filename = filename
+
+        if commit:
+            save_format.save()
+
+        return save_format
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+
+        return cleaned_data
+

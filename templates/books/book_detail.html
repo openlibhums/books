@@ -20,7 +20,7 @@
                 <br/>{% endif %}
             <h6>Downloads</h6>
             {% for format in book.format_set.all %}
-                <a href="" class="button">{{ format.title }}</a>
+                <a href="{% url 'books_download_format' book.pk format.pk %}" class="button">{{ format.title }}</a>
             {% endfor %}
         </div>
     </div>
