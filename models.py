@@ -58,6 +58,13 @@ class Book(models.Model):
         else:
             return 'No Authors'
 
+    def get_next_contributor_sequence(self):
+        if self.contributor_set.all():
+            last_contributor = self.contributor_set.all().reverse()[0]
+            return last_contributor.sequence + 1
+        else:
+            return 1
+
 
 class Contributor(models.Model):
     book = models.ForeignKey(Book)

@@ -17,6 +17,12 @@ class BookForm(forms.ModelForm):
 
 class ContributorForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        book = kwargs.pop('book', None)
+        super(ContributorForm, self).__init__(*args, **kwargs)
+
+        self.fields['sequence'].initial = book.get_next_contributor_sequence()
+
     class Meta:
         model = models.Contributor
         exclude = ('book',)

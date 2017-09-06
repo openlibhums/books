@@ -78,9 +78,35 @@ def edit_book(request, book_id=None):
     return render(request, template, context)
 
 
-def edit_contributor(request, book_id, contributor=None):
-    pass
+def edit_contributor(request, book_id, contributor_id=None):
+
+    contributor = None
+    book = get_object_or_404(models.Book, pk=book_id)
+
+    if contributor_id:
+        contributor = get_object_or_404(models.Contributor, pk=contributor_id, book__pk=book_id)
+
+    form = forms.ContributorForm(instance=contributor, book=book)
+
+    if request.POST:
+        form = forms.ContributorForm(request.POST, instance=contributor, book=book)
+
+        if form.is_valid():
+            form_contributor = form.save(commit=False)
+            form_contributor.book = book
+            form_contributor.save()
+
+            return redirect(reverse('books_edit_book', kwargs={'book_id': book.pk}))
+
+    template = 'books/edit_contributor.html'
+    context = {
+        'book': book,
+        'contributor': contributor,
+        'form': form,
+    }
+
+    return render(request, template, context)
 
 
-def edit_format(request, book_id, format=None):
+def edit_format(request, book_id, format_id=None):
     pass
