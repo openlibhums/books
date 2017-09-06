@@ -7,6 +7,7 @@
 {% block breadcrumbs %}
     {{ block.super }}
     <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+    {% if book %}<li>{{ book.title }}</li>{% else %}<li>New Book</li>{% endif %}
 {% endblock %}
 
 
@@ -31,11 +32,15 @@
                 </div>
                 <div class="content">
                     <ul class="list-group">
-                    {% for cont in book.contributor_set.all %}
-                        <li class="list-group-item">{{ cont }}</li>
-                    {% empty %}
-                        <li class="list-group-item list-group-item-info">No contributors</li>
-                    {% endfor %}
+                    {% if not book %}
+                        <li class="list-group-item list-group-item-danger">Save book before adding contributors.</li>
+                    {% else %}
+                        {% for cont in book.contributor_set.all %}
+                            <li class="list-group-item">{{ cont }}</li>
+                        {% empty %}
+                            <li class="list-group-item list-group-item-info">No contributors</li>
+                        {% endfor %}
+                    {% endif %}
                     </ul>
                 </div>
                 <div class="title-area">
@@ -43,11 +48,15 @@
                 </div>
                 <div class="content">
                     <ul class="list-group">
-                        {% for format in book.format_set.all %}
-                        <li class="list-group-item">{{ format }}</li>
-                        {% empty %}
-                        <li class="list-group-item list-group-item-info">No formats</li>
-                        {% endfor %}
+                        {% if not book %}
+                            <li class="list-group-item list-group-item-danger">Save book before adding formats.</li>
+                        {% else %}
+                            {% for format in book.format_set.all %}
+                            <li class="list-group-item">{{ format }}</li>
+                            {% empty %}
+                            <li class="list-group-item list-group-item-info">No formats</li>
+                            {% endfor %}
+                        {% endif %}
                     </ul>
                 </div>
             </div>
