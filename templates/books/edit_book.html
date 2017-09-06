@@ -27,7 +27,28 @@
             </div>
             <div class="large-6 columns">
                 <div class="title-area">
-                    <h2>Authors and Formats</h2>
+                    <h2>Contributors</h2>
+                </div>
+                <div class="content">
+                    <ul class="list-group">
+                    {% for cont in book.contributor_set.all %}
+                        <li class="list-group-item">{{ cont }}</li>
+                    {% empty %}
+                        <li class="list-group-item list-group-item-info">No contributors</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                <div class="title-area">
+                    <h2>Formats</h2>
+                </div>
+                <div class="content">
+                    <ul class="list-group">
+                        {% for format in book.format_set.all %}
+                        <li class="list-group-item">{{ format }}</li>
+                        {% empty %}
+                        <li class="list-group-item list-group-item-info">No formats</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
