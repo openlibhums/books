@@ -37,7 +37,7 @@
                         <li class="list-group-item list-group-item-danger">Save book before adding contributors.</li>
                     {% else %}
                         {% for cont in book.contributor_set.all %}
-                            <li class="list-group-item">{{ cont }}</li>
+                            <li class="list-group-item"><a href="{% url 'books_edit_contributor' book.pk cont.pk %}">{{ cont }}</a></li>
                         {% empty %}
                             <li class="list-group-item list-group-item-info">No contributors</li>
                         {% endfor %}
@@ -54,7 +54,7 @@
                             <li class="list-group-item list-group-item-danger">Save book before adding formats.</li>
                         {% else %}
                             {% for format in book.format_set.all %}
-                            <li class="list-group-item">{{ format }}</li>
+                                <li class="list-group-item"><a href="{% url 'books_edit_format' book.pk format.pk %}">{{ format }}</a></li>
                             {% empty %}
                             <li class="list-group-item list-group-item-info">No formats</li>
                             {% endfor %}
