@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ONIXMessage release="3.0">
+    <Header>
+        <Sender>
+            <SenderName>{{ request.press.name }}</SenderName>
+            <EmailAddress>{{ press.main_contact }}</EmailAddress>
+        </Sender>
+        <Addressee>
+            <AddresseeName>{{ request.press.domain }}</AddresseeName>
+        </Addressee>
+        <SentDateTime>{% now "Ymd" %}​</SentDateTime>
+        <MessageNote>Export from Janeway​</MessageNote>
+    </Header>
+    {% for book in books %}
+    <Product>
+        <RecordReference>{{ request.press.name|slugify }}.{% if book.doi %}{{ book.doi }}{% else %}{{ book.pk }}{% endif %}</RecordReference>
+        <NotificationType>03​</NotificationType>
+        {% if book.isbn %}
+            <ProductIdentifier>
+                <ProductIDType>15</ProductIDType>
+                <IDValue>{{ book.isbn }}</IDValue>
+            </ProductIdentifier>
+        {% endif %}
+        <DescriptiveDetail>
+            <TitleDetail>
+                 <TitleElement>
+                    <SequenceNumber>1​</SequenceNumber>
+                    <TitleElementLevel>01​</TitleElementLevel>
+                    <TitleWithoutPrefix textcase="01">{{ book.title }}</TitleWithoutPrefix>
+                 </TitleElement>
+            </TitleDetail>
+            {% for contributor in book.contributor_set.all %}
+            <Contributor>
+                <SequenceNumber>{{ forloop.counter }}</SequenceNumber>
+                <ContributorRole>A01​</ContributorRole>
+                <NamesBeforeKey>{{ contributor.first_name }}{% if contributor.middle_name %} {{ contributor.middle_initial }}{% endif %}</NamesBeforeKey>
+                <KeyNames>{{ contributor.last_name }}</KeyNames>
+                <BiographicalNote textformat="05">{{ contributor.affiliation|safe }}​</BiographicalNote>
+            </Contributor>
+            {% endfor %}
+            <Extent>
+                <ExtentType>00​</ExtentType>
+                <ExtentValue>{{ book.pages }}</ExtentValue>
+                <ExtentUnit>03​</ExtentUnit>
+            </Extent>
+        </DescriptiveDetail>
+        <CollateralDetail>
+            <TextContent>
+                <TextType>03​</TextType>
+                <ContentAudience>00​</ContentAudience>
+                <Text textformat="05">{{ book.description|safe }}</Text>
+            </TextContent>
+            <SupportingResource>
+                <ResourceContentType>01​</ResourceContentType>
+                <ContentAudience>00​</ContentAudience>
+                <ResourceMode>03​</ResourceMode>
+                <ResourceVersion>
+                    <ResourceForm>02​</ResourceForm>
+                    <ResourceVersionFeature>
+                        <ResourceVersionFeatureType>01​</ResourceVersionFeatureType>
+                        <FeatureValue>{{ book.cover_onix_code }}</FeatureValue>
+                    </ResourceVersionFeature>
+                    <ResourceVersionFeature>
+                        <ResourceVersionFeatureType>02​</ResourceVersionFeatureType>
+                        <FeatureValue>{{ book.cover_height }}</FeatureValue>
+                    </ResourceVersionFeature>
+                    <ResourceVersionFeature>
+                        <ResourceVersionFeatureType>03​</ResourceVersionFeatureType>
+                        <FeatureValue>{{ book.cover_width }}</FeatureValue>
+                    </ResourceVersionFeature>
+                    <ResourceLink>{{ request.press_base_url }}{{ book.cover.url|urlencode }}​</ResourceLink>
+                </ResourceVersion>
+            </SupportingResource>
+        </CollateralDetail>
+        <PublishingDetail>
+            <Imprint>
+                <ImprintName>{{ request.press.name }}</ImprintName>
+            </Imprint>
+            <Publisher>
+                <PublishingRole>01​</PublishingRole>
+                <PublisherName>{{ book.publisher_name }}</PublisherName>
+            </Publisher>
+            <Website>
+                <WebsiteRole>01</WebsiteRole>
+                <WebsiteLink>{{ request.press_base_url }}</WebsiteLink>
+            </Website>
+            <CityOfPublication>{{ book.publisher_loc }}</CityOfPublication>
+            <PublishingStatus datestamp="{{ book.date_published|date:"Ymd" }}">04​</PublishingStatus>
+            <PublishingDate>
+                <PublishingDateRole>01​</PublishingDateRole>
+                <Date dateformat="00">{{ book.date_published|date:"Ymd" }}</Date>
+            </PublishingDate>
+        </PublishingDetail>
+    </Product>
+    {% endfor %}
+</ONIXMessage>

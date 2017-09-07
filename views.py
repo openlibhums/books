@@ -78,6 +78,7 @@ def edit_book(request, book_id=None):
     return render(request, template, context)
 
 
+@staff_member_required()
 def edit_contributor(request, book_id, contributor_id=None):
 
     contributor = None
@@ -108,6 +109,7 @@ def edit_contributor(request, book_id, contributor_id=None):
     return render(request, template, context)
 
 
+@staff_member_required
 def edit_format(request, book_id, format_id=None):
 
     book_format = None
@@ -136,3 +138,19 @@ def edit_format(request, book_id, format_id=None):
 
     return render(request, template, context)
 
+
+@staff_member_required
+def export_onix_xml(request, book_id=None):
+
+    books = models.Book.objects.all()
+    print(books)
+
+    if book_id:
+        books = models.Book.objects.filter(pk=book_id)
+
+    template = 'books/onix.xml'
+    context = {
+        'books': books,
+    }
+
+    return render(request, template, context)

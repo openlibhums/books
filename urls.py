@@ -15,4 +15,6 @@ urlpatterns = [
         name='books_edit_contributor'),
     url(r'^admin/edit/(?P<book_id>\d+)/format/$', views.edit_format, name='books_new_format'),
     url(r'^admin/edit/(?P<book_id>\d+)/format/(?P<format_id>\d+)/$', views.edit_format, name='books_edit_format'),
+    url(r'^onix/export/$', views.export_onix_xml, name='books_export_onix_xml'),
+    url(r'^onix/export/(?P<book_id>\d+)/$', views.export_onix_xml, name='books_export_onix_xml_book'),
 ]

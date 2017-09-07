@@ -1,9 +1,11 @@
 import uuid
 import os
+from mimetypes import guess_type
 
 from django.db import models
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.core.files.images import get_image_dimensions
 
 
 fs = FileSystemStorage(location=settings.MEDIA_ROOT)
@@ -65,6 +67,24 @@ class Book(models.Model):
         else:
             return 1
 
+    def cover_onix_code(self):
+        mapping = {
+            'image/gif': 'D501',
+            'image/jpeg': 'D502',
+            'image/png': 'D503',
+            'image/tiff': 'D504'
+        }
+        return mapping.get(guess_type(self.cover.url)[0], 'D502')
+
+    def cover_height(self):
+        width, height = get_image_dimensions(self.cover)
+        return height
+
+    def cover_width(self):
+        width, height = get_image_dimensions(self.cover)
+        return width
+
+
 
 class Contributor(models.Model):
     book = models.ForeignKey(Book)
@@ -84,6 +104,10 @@ class Contributor(models.Model):
             return "{0} {1}".format(self.first_name, self.last_name)
         else:
             return "{0} {1} {2}".format(self.first_name, self.middle_name, self.last_name)
+
+    def middle_initial(self):
+        if self.middle_name:
+            return '{middle_initial}.'.format(middle_initial=self.middle_name[0])
 
 
 class Format(models.Model):
