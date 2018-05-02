@@ -1,0 +1,51 @@
+{% extends "admin/core/base.html" %}
+
+{% block title %}Books Admin{% endblock title %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+    <li>Import Books</li>
+    <li>Verify</li>
+{% endblock %}
+
+
+{% block body %}
+    <div class="large-12 columns">
+        <div class="box">
+            <div class="title-area">
+                <h2>Import Books</h2>
+            </div>
+            <div class="content" style="overflow-x:scroll">
+                <p>The following rows were parsed successfully</p>
+                {% if not has_error_lines %}
+                    <p>Once you've checked over the preview, you can import the results.</p>
+                {% endif %}
+                <table>
+                    <tr style="vertical-align: top">
+                        {% for header in headers %}
+                            <th style="padding:0 15px 0 15px;">{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                    {% for row in good_rows %}
+                        <tr style="border: solid; border-width: 1px 0;vertical-align: top">
+                            {% for value in row %}
+                                <td style="padding:0 15px 0 15px;">{{ value }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                {% if has_error_lines %}
+                    <p>But there were problems with several rows:</p>
+                    <ul>
+                        {% for error_line in error_lines %}
+                            <li>{{ error_line }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}

@@ -1,12 +1,20 @@
 import os
 from uuid import uuid4
 from wsgiref.util import FileWrapper
+from csv import DictReader
 
 from django.conf import settings
 from django.http import StreamingHttpResponse, Http404
 from django.utils.text import slugify
 
 from core import files
+
+CSV_HEADERS = ['Prefix', 'Title', 'Subtitle', 'Description', 'Pages', 'Edited Volume', 'Date Published',
+               'Publisher Name', 'Publisher Location', 'DOI', 'ISBN', 'Purchase URL']
+CSV_EXAMPLE = ['The', 'Lord of the Rings', 'Fellowship if the Ring', 'Hobbit takes jewellery on excursion', '398',
+               '0', '1954-07-29', 'Allen and Unwin', 'London', '10.1234/123.1', '0618346252',
+               'https://www.amazon.com/Fellowship-Ring-Being-First-Rings/dp/0547928211/']
+temp_directory = os.path.join(settings.BASE_DIR, 'files', 'temp')
 
 
 def delete_book_file(filename):
@@ -42,3 +50,58 @@ def serve_book_file(book_format):
         return response
     else:
         raise Http404
+
+
+def pre_process(uuid):
+    out_text = ''
+
+    with open(os.path.join(temp_directory, uuid), 'r') as in_file:
+        out_text += in_file.readline()
+
+        out_text = out_text.replace(' ,', ',')
+        out_text = out_text.replace(', ', ',')
+        out_text += in_file.read()
+
+    with open(os.path.join(temp_directory, uuid), 'w') as out_file:
+        out_file.write(out_text)
+
+
+def verify_upload(uuid):
+    is_verified = False
+    has_error = False
+    error_message = []
+    has_error_lines = False
+    error_lines = []
+    good_lines = []
+
+    # remove dud lines
+    pre_process(uuid)
+
+    with open(os.path.join(temp_directory, uuid), 'r') as in_file:
+        reader = DictReader(in_file)
+
+        counter = 0
+
+        for row in reader:
+            counter += 1
+            try:
+                if not is_verified:
+                    for item in CSV_HEADERS:
+                        if not item in row:
+                            has_error = True
+                            error_message.append('Expected field \'{0}\' is not present in the upload on line {1}.'.format(item, counter))
+                    is_verified = True
+
+                    if has_error:
+                        return has_error, error_message, has_error_lines, error_lines, good_lines
+
+                output_row = []
+
+                for item in CSV_HEADERS:
+                    output_row.append(row[item])
+
+                good_lines.append(output_row)
+            except:
+                error_lines.append(counter)
+
+    return has_error, error_message, has_error_lines, error_lines, good_lines

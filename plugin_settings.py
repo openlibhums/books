@@ -1,5 +1,5 @@
 PLUGIN_NAME = 'Books Plugin'
-DESCRIPTION = 'This plugin supports the publication of books in Acta.'
+DESCRIPTION = 'This plugin supports the publication of books in Janeway.'
 AUTHOR = 'Andy Byers'
 VERSION = '1.0'
 SHORT_NAME = 'books'
@@ -22,4 +22,3 @@ def hook_registry():
     # On site load, the load function is run for each installed plugin to generate
     # a list of hooks.
     pass
-    # return {'article_footer_block': {'module': 'plugins.disqus.hooks', 'function': 'inject_disqus'}}
