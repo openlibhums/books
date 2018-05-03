@@ -20,6 +20,10 @@
                 <p>The following rows were parsed successfully</p>
                 {% if not has_error_lines %}
                     <p>Once you've checked over the preview, you can import the results.</p>
+                    <form method="POST" action="{% url 'books_import_process' UUID %}">
+                        {% csrf_token %}
+                        <button class="success button">Import</button>
+                    </form>
                 {% endif %}
                 <table>
                     <tr style="vertical-align: top">

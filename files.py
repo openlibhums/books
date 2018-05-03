@@ -6,8 +6,10 @@ from csv import DictReader
 from django.conf import settings
 from django.http import StreamingHttpResponse, Http404
 from django.utils.text import slugify
+from django.utils import dateparse
 
 from core import files
+from plugins.books import models
 
 CSV_HEADERS = ['Prefix', 'Title', 'Subtitle', 'Description', 'Pages', 'Edited Volume', 'Date Published',
                'Publisher Name', 'Publisher Location', 'DOI', 'ISBN', 'Purchase URL']
@@ -105,3 +107,24 @@ def verify_upload(uuid):
                 error_lines.append(counter)
 
     return has_error, error_message, has_error_lines, error_lines, good_lines
+
+
+def perform_book_import(uuid):
+    with open(os.path.join(temp_directory, uuid), 'r') as in_file:
+        reader = DictReader(in_file)
+
+        for row in reader:
+            book = models.Book.objects.create(
+                prefix=row.get('Prefix', ''),
+                title=row.get('Title', ''),
+                subtitle=row.get('Subtitle', ''),
+                description=row.get('Description', ''),
+                pages=row.get('Pages', ''),
+                is_edited_volume=True if row.get('Edited Volume') == 1 else False,
+                date_published=dateparse.parse_date(row.get('Date Published')),
+                publisher_name=row.get('Publisher Name'),
+                publisher_loc=row.get('Publisher Location'),
+                doi=row.get('DOI'),
+                isbn=row.get('ISBN'),
+                purchase_url=row.get('Purchase URL')
+            )

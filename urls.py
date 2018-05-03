@@ -17,8 +17,9 @@ urlpatterns = [
     url(r'^admin/edit/(?P<book_id>\d+)/format/(?P<format_id>\d+)/$', views.edit_format, name='books_edit_format'),
 
     url(r'^admin/import/$', views.import_books_upload, name='books_import_books_upload'),
-    url(r'^admin/import/(?P<uuid>.+)/$', views.import_books_preview, name='books_import_preview'),
     url(r'^admin/import/(?P<uuid>.+)/process/$', views.import_books_process, name='books_import_process'),
+    url(r'^admin/import/(?P<uuid>.+)/$', views.import_books_preview, name='books_import_preview'),
+
 
 
     url(r'^onix/export/$', views.export_onix_xml, name='books_export_onix_xml'),

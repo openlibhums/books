@@ -166,9 +166,9 @@ def import_books_upload(request):
 
 @staff_member_required
 def import_books_preview(request, uuid):
-    uuid = '{uuid}.csv'.format(uuid=uuid)
+    uuid_csv = '{uuid}.csv'.format(uuid=uuid)
     try:
-        has_error, error_message, has_error_lines, error_lines, good_lines = files.verify_upload(uuid)
+        has_error, error_message, has_error_lines, error_lines, good_lines = files.verify_upload(uuid_csv)
     except Exception as e:
         has_error = True
         error_message = ['There was a general error processing the uploaded file: {0}.'.format(e)]
