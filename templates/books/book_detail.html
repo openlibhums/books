@@ -18,7 +18,9 @@
             {% if book.isbn %}<strong>ISBN</strong> {{ book.isbn }}<br/><br/>{% endif %}
             {% if book.doi %}<strong>DOI</strong> <a href="https://doi.org/{{ book.doi }}">{{ book.doi }}</a><br/>
                 <br/>{% endif %}
+            {% if book.format_set.all %}
             <h6>Downloads</h6>
+            {% endif %}
             {% for format in book.format_set.all %}
                 <a href="{% url 'books_download_format' book.pk format.pk %}" class="button">{{ format.title }}</a>
             {% endfor %}
