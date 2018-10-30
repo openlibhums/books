@@ -22,6 +22,10 @@
             {% for format in book.format_set.all %}
                 <a href="{% url 'books_download_format' book.pk format.pk %}" class="button">{{ format.title }}</a>
             {% endfor %}
+            {% if book.purchase_url %}
+                <h6>Purchase</h6>
+                <a href="{{ book.purchase_url }}" class="button" target="_blank">Buy this Book</a>
+            {% endif %}
         </div>
     </div>
 </div>
