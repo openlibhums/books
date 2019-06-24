@@ -1,7 +1,7 @@
 import csv
 
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 
@@ -10,7 +10,11 @@ from core import files as core_files
 
 
 def index(request):
-    books = models.Book.objects.filter(date_published__isnull=False)
+    books = models.Book.objects.filter(
+        date_published__isnull=False,
+    ).order_by(
+        '-date_published',
+    )
 
     template = 'books/index.html'
     context = {

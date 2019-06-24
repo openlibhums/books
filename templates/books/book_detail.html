@@ -1,33 +1,49 @@
+{% load static from staticfiles %}
 <div class="large-12 columns">
     <div class="content clearfix">
-        <div class="large-2 columns">
+        <div class="large-3 columns">
             <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
+            {% if book.is_open_access %}
+                <img src="{% static 'media/books/oa.png' %}" alt="Open Access Logo" style="padding: 30px; padding-bottom: 0;">
+            {% endif %}
             {% if not books %}<p><a href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
         </div>
-        <div class="large-7 columns">
-            <a href="{% url 'books_book' book.pk %}"><h2>{{ book.full_title }}</h2></a>
-            <h6>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
-            {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</h6>
-            {{ book.description|safe|linebreaksbr }}
-        </div>
-        <div class="large-3 columns">
-            <h6>About this Book</h6>
-            <strong>Published</strong> {{ book.date_published }}<br/><br/>
-            <strong>Published by</strong> {{ book.publisher_name }}<br/><br/>
-            {% if book.pages %}<strong>Pages</strong> {{ book.pages }}<br/><br/>{% endif %}
-            {% if book.isbn %}<strong>ISBN</strong> {{ book.isbn }}<br/><br/>{% endif %}
-            {% if book.doi %}<strong>DOI</strong> <a href="https://doi.org/{{ book.doi }}">{{ book.doi }}</a><br/>
-                <br/>{% endif %}
-            {% if book.format_set.all %}
-            <h6>Downloads</h6>
-            {% endif %}
+        <div class="large-9 columns">
+            <h2>{% if books %}<a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}{% if books %}</a>{% endif %}</h2>
+            <h6><em>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
+            {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
+
             {% for format in book.format_set.all %}
-                <a href="{% url 'books_download_format' book.pk format.pk %}" class="button">{{ format.title }}</a>
+                <a href="{% url 'books_download_format' book.pk format.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download {{ format.title }}</a>
             {% endfor %}
-            {% if book.purchase_url %}
-                <h6>Purchase</h6>
-                <a href="{{ book.purchase_url }}" class="button" target="_blank">Buy this Book</a>
-            {% endif %}
+            {% if book.purchase_url %}<a href="{{ book.purchase_url }}" class="button" target="_blank"><i class="fa fa-external-link"></i>&nbsp;Buy this Book</a>{% endif %}
+
+            <table class="table" style="margin-bottom: 0;">
+                <tr>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>{{ book.description|safe }}</td>
+                </tr>
+            </table>
+
+            <table class="table">
+                <tr>
+                    <th>Published</th>
+                    <th>Published By</th>
+                    <th>Pages</th>
+                    {% if book.isbn %}<th>ISBN</th>{% endif %}
+                    {% if book.doi %}<th>DOI</th>{% endif %}
+                </tr>
+                <tr>
+                    <td>{{ book.date_published }}</td>
+                    <td>{{ book.publisher_name }}</td>
+                    <td>{{ book.pages }}</td>
+                    {% if book.isbn %}<td>{{ book.isbn }}</td>{% endif %}
+                    {% if book.doi %}<td>{{ book.doi }}</td>{% endif %}
+                </tr>
+            </table>
+
         </div>
     </div>
 </div>

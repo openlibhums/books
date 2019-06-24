@@ -47,7 +47,11 @@ def serve_book_file(book_format):
         response = StreamingHttpResponse(FileWrapper(open(file_path, 'rb'), 8192),
                                          content_type=files.guess_mime(book_format.filename))
         response['Content-Length'] = os.path.getsize(file_path)
-        response['Content-Disposition'] = 'attachment; filename="{0}{1}"'.format(slugify(filename), extension)
+        response['Content-Disposition'] = 'attachment;' \
+                                          ' filename="{0}{1}"'.format(
+            slugify(book_format.book.full_title()),
+            extension
+        )
 
         return response
     else:

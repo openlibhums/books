@@ -29,6 +29,7 @@ class Book(models.Model):
     pages = models.PositiveIntegerField()
 
     is_edited_volume = models.BooleanField(default=False)
+    is_open_access = models.BooleanField(default=True)
     date_published = models.DateField(blank=True, null=True)
 
     publisher_name = models.CharField(max_length=100)
@@ -83,7 +84,6 @@ class Book(models.Model):
     def cover_width(self):
         width, height = get_image_dimensions(self.cover)
         return width
-
 
 
 class Contributor(models.Model):

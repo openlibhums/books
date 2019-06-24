@@ -19,7 +19,9 @@
             <table id="books">
                 <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Title</th>
+                    <th>Subtile</th>
                     <th>First Author</th>
                     <th>ISBN</th>
                     <th>DOI</th>
@@ -29,7 +31,9 @@
                 <tbody>
                 {% for book in books %}
                     <tr>
+                        <td>{{ book.pk }}</td>
                         <td><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></td>
+                        <td>{{ book.subtitle }}</td>
                         <td>{{ book.first_contributor }}</td>
                         <td>{{ book.isbn }}</td>
                         <td>{{ book.doi }}</td>

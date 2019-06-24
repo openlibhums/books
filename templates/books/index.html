@@ -1,4 +1,4 @@
-{% extends "press/core/base.html" %}
+{% extends "core/base.html" %}
 
 {% block title %}Books{% endblock %}
 
@@ -13,6 +13,7 @@
                         {% include "books/book_detail.html" with book=book %}
                     </div>
                 </div>
+                <hr />
             {% empty %}
                 <p>There are no published books to display.</p>
             {% endfor %}
