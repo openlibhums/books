@@ -4,7 +4,7 @@
         <div class="large-3 columns">
             <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
             {% if book.is_open_access %}
-                <img src="{% static 'media/books/oa.png' %}" alt="Open Access Logo" style="padding: 30px; padding-bottom: 0;">
+                <img src="/media/books/oa.png" alt="Open Access Logo" style="padding: 30px; padding-bottom: 0;">
             {% endif %}
             {% if not books %}<p><a href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
         </div>
