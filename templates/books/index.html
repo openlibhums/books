@@ -9,10 +9,8 @@
 
             {% for book in books %}
                 <div class="box journal">
-                    <div class="row collapse">
                         {% include "books/book_detail.html" with book=book %}
                     </div>
-                </div>
                 <hr />
             {% empty %}
                 <p>There are no published books to display.</p>

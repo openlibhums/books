@@ -3,13 +3,16 @@
     <div class="content clearfix">
         <div class="large-3 columns">
             <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
-            {% if book.is_open_access %}
-                <img src="/media/books/oa.png" alt="Open Access Logo" style="padding: 30px; padding-bottom: 0;">
-            {% endif %}
+
             {% if not books %}<p><a href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
         </div>
         <div class="large-9 columns">
-            <h2>{% if books %}<a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}{% if books %}</a>{% endif %}</h2>
+            {% if book.is_open_access %}
+                {% include "books/oa_header.html" %}
+            {% else %}
+                <h2>{% if books %}<a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}{% if books %}</a>{% endif %}</h2>
+            {% endif %}
+
             <h6><em>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
             {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
 
@@ -27,7 +30,7 @@
                 </tr>
             </table>
 
-            <table class="table">
+            <table class="table scroll">
                 <tr>
                     <th>Published</th>
                     <th>Published By</th>
