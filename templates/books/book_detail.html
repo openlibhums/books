@@ -1,4 +1,5 @@
 {% load static from staticfiles %}
+{% load i18n %}
 <div class="large-12 columns">
     <div class="content clearfix">
         <div class="large-3 columns">
@@ -6,7 +7,7 @@
 
             {% if not books %}<p><a href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
         </div>
-        <div class="large-9 columns">
+        <div class="{% if books %}large-9 columns{% else %}large-7 columns{% endif %}">
             {% if book.is_open_access %}
                 {% include "books/oa_header.html" %}
             {% else %}
@@ -48,5 +49,15 @@
             </table>
 
         </div>
+
+        {% if not books %}
+            <div class="large-2 columns">
+                <h3>Book Metrics</h3>
+                <h4>{{ book.metrics.downloads }}</h4>
+                <p>Downloads</p>
+                <h4>{{ book.metrics.views }}</h4>
+                <p>Views</p>
+            </div>
+        {% endif %}
     </div>
 </div>

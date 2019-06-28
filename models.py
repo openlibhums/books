@@ -93,6 +93,20 @@ class Book(models.Model):
         width, height = get_image_dimensions(self.cover)
         return width
 
+    def metrics(self):
+        all_metrics = BookAccess.objects.filter(
+            book=self,
+        )
+
+        views = all_metrics.filter(type='view')
+        downloads = all_metrics.filter(type='download')
+
+        return {
+            'total': all_metrics.count(),
+            'views': views.count(),
+            'downloads': downloads.count(),
+        }
+
 
 class Contributor(models.Model):
     book = models.ForeignKey(Book)
