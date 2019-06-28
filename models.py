@@ -1,11 +1,19 @@
 import uuid
 import os
 from mimetypes import guess_type
+from datetime import timedelta
+
+from user_agents import parse as parse_ua_string
 
 from django.db import models
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.core.files.images import get_image_dimensions
+from django.utils import timezone
+
+from metrics.logic import get_iso_country_code
+from utils.shared import get_ip_address
+from core import models as core_models
 
 
 fs = FileSystemStorage(location=settings.MEDIA_ROOT)
@@ -122,3 +130,60 @@ class Format(models.Model):
 
     def __str__(self):
         return self.title
+
+    def add_book_access(self, request):
+        try:
+            user_agent = parse_ua_string(request.META.get('HTTP_USER_AGENT', None))
+        except TypeError:
+            user_agent = None
+
+        ip = get_ip_address(request)
+        iso_country_code = get_iso_country_code(ip)
+        identifier = request.session.session_key
+
+        try:
+            country = core_models.Country.objects.get(
+                code=iso_country_code,
+            )
+        except core_models.Country.DoesNotExist:
+            country = None
+
+        if user_agent and not user_agent.is_bot:
+
+            # check if the current IP has accessed this article recently.
+            time_to_check = timezone.now() - timedelta(seconds=10)
+            check = BookAccess.objects.filter(
+                book=self.book,
+                format=self,
+                accessed__gte=time_to_check,
+                type='download',
+                identifier=identifier,
+            ).count()
+
+            if not check:
+                BookAccess.objects.create(
+                    book=self.book,
+                    format=self,
+                    type='download',
+                    country=country,
+                    identifier=identifier,
+                )
+
+
+def access_choices():
+    return (
+        ('download', 'Download'),  # A download of any book format
+        ('view', 'View'),  # A view of a book page
+    )
+
+
+class BookAccess(models.Model):
+    book = models.ForeignKey(Book)
+    type = models.CharField(max_length=20, choices=access_choices())
+    format = models.ForeignKey(Format)
+    accessed = models.DateTimeField(default=timezone.now)
+    country = models.ForeignKey('core.Country', null=True, blank=True)
+    identifier = models.CharField(max_length=100)
+
+    def __str__(self):
+        return '[{0}] - {1} at {2}'.format(self.format, self.book.title, self.accessed)

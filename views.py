@@ -36,8 +36,13 @@ def view_book(request, book_id):
 
 
 def download_format(request, book_id, format_id):
+    # Forcing a session to be created where people link directly to the book.
+    request.session.save()
+
     book = get_object_or_404(models.Book, pk=book_id, date_published__isnull=False)
     format = get_object_or_404(models.Format, pk=format_id, book=book)
+
+    format.add_book_access(request)
 
     # Handle serving the file here
     return files.serve_book_file(format)

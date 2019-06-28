@@ -6,6 +6,7 @@ admin_list = [
     (Book, ),
     (Contributor,),
     (Format,),
+    (BookAccess,),
 ]
 
 [admin.site.register(*t) for t in admin_list]
