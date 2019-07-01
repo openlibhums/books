@@ -58,6 +58,10 @@ def serve_book_file(book_format):
         raise Http404
 
 
+def get_file_path(book_format):
+    return os.path.join(settings.BASE_DIR, 'files', 'press', 'books', book_format.filename)
+
+
 def pre_process(uuid):
     out_text = ''
 

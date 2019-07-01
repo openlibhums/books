@@ -1,9 +1,11 @@
 import csv
+import magic
 
 from django.shortcuts import render, get_object_or_404, redirect, HttpResponse
 from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
+from django.http import Http404
 
 from plugins.books import models, forms, files
 from core import files as core_files
@@ -35,17 +37,39 @@ def view_book(request, book_id):
     return render(request, template, context)
 
 
-def download_format(request, book_id, format_id):
+def download_format(request, book_id, format_id, mark_download='yes'):
     # Forcing a session to be created where people link directly to the book.
     request.session.save()
 
     book = get_object_or_404(models.Book, pk=book_id, date_published__isnull=False)
     format = get_object_or_404(models.Format, pk=format_id, book=book)
 
-    format.add_book_access(request)
+    if mark_download == 'yes':
+        format.add_book_access(request, 'download')
 
     # Handle serving the file here
     return files.serve_book_file(format)
+
+
+def read_epub(request, book_id, format_id):
+    book = get_object_or_404(models.Book, pk=book_id)
+    format = get_object_or_404(models.Format, pk=format_id, book=book)
+
+    mime = magic.from_file(files.get_file_path(format), mime=True)
+
+    if not mime == 'application/epub+zip':
+        raise Http404
+
+    format.add_book_access(request, 'view')
+
+    template = 'books/book_epub.html'
+    context = {
+        'book': book,
+        'format': format,
+    }
+
+    return render(request, template, context)
+
 
 
 @staff_member_required

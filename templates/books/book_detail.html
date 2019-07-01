@@ -19,6 +19,7 @@
 
             {% for format in book.format_set.all %}
                 <a href="{% url 'books_download_format' book.pk format.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download {{ format.title }}</a>
+                {% if format.is_epub %}<a href="{% url 'books_read_epub' book.pk format.pk %}" target="_blank" class="button"><i class="fa fa-book">&nbsp;</i> Read this Book</a>{% endif %}
             {% endfor %}
             {% if book.purchase_url %}<a href="{{ book.purchase_url }}" class="button" target="_blank"><i class="fa fa-external-link"></i>&nbsp;Buy this Book</a>{% endif %}
 

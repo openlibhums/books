@@ -2,6 +2,7 @@ import uuid
 import os
 from mimetypes import guess_type
 from datetime import timedelta
+import magic
 
 from user_agents import parse as parse_ua_string
 
@@ -14,6 +15,7 @@ from django.utils import timezone
 from metrics.logic import get_iso_country_code
 from utils.shared import get_ip_address
 from core import models as core_models
+from plugins.books import files
 
 
 fs = FileSystemStorage(location=settings.MEDIA_ROOT)
@@ -145,7 +147,12 @@ class Format(models.Model):
     def __str__(self):
         return self.title
 
-    def add_book_access(self, request):
+    def is_epub(self):
+        mime = magic.from_file(files.get_file_path(self), mime=True)
+        if mime == 'application/epub+zip':
+            return True
+
+    def add_book_access(self, request, access_type='download'):
         try:
             user_agent = parse_ua_string(request.META.get('HTTP_USER_AGENT', None))
         except TypeError:
@@ -170,7 +177,7 @@ class Format(models.Model):
                 book=self.book,
                 format=self,
                 accessed__gte=time_to_check,
-                type='download',
+                type=access_type,
                 identifier=identifier,
             ).count()
 
@@ -178,7 +185,7 @@ class Format(models.Model):
                 BookAccess.objects.create(
                     book=self.book,
                     format=self,
-                    type='download',
+                    type=access_type,
                     country=country,
                     identifier=identifier,
                 )
