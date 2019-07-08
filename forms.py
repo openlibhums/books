@@ -57,7 +57,15 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 
 
+class MonthInput(forms.DateInput):
+    input_type = 'month'
+
+
 class DateForm(forms.Form):
     start_date = forms.DateField(widget=DateInput())
     end_date = forms.DateField(widget=DateInput())
 
+
+class MonthForm(forms.Form):
+    start_month = forms.DateField(widget=MonthInput())
+    end_month = forms.DateField(widget=MonthInput())

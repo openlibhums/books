@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^admin/import/(?P<uuid>.+)/$', views.import_books_preview, name='books_import_preview'),
 
     url(r'^admin/metrics/$', views.book_metrics, name='books_metrics'),
-
+    url(r'^admin/metrics/by_month/$', views.book_metrics_by_month, name='books_metrics_by_month'),
 
     url(r'^onix/export/$', views.export_onix_xml, name='books_export_onix_xml'),
     url(r'^onix/export/(?P<book_id>\d+)/$', views.export_onix_xml, name='books_export_onix_xml_book'),

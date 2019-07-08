@@ -1,5 +1,8 @@
 from plugins.books import models
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from dateutil.relativedelta import relativedelta
+
+from django.utils import timezone
 
 
 def get_first_day(dt, d_years=0, d_months=0):
@@ -19,6 +22,41 @@ def get_start_and_end_date(request):
     last_date = request.GET.get('end_date', get_last_day(d))
 
     return start_date, last_date
+
+
+def get_first_month_year():
+    return '{year}-{month}'.format(year=timezone.now().year, month='01')
+
+
+def get_current_month_year():
+    return '{year}-{month}'.format(
+        year=timezone.now().year,
+        month=timezone.now().strftime('%m'),
+    )
+
+
+def get_start_and_end_months(request):
+    start_month = request.GET.get(
+        'start_month', get_first_month_year()
+    )
+
+    end_month = request.GET.get(
+        'end_month', get_current_month_year()
+    )
+
+    start_month_m, start_month_y = start_month.split('-')
+    end_month_m, end_month_y = end_month.split('-')
+
+    date_parts = {
+        'start_month_m': start_month_m,
+        'start_month_y': start_month_y,
+        'end_month_m': end_month_m,
+        'end_month_y': end_month_y,
+        'start_unsplit': start_month,
+        'end_unsplit': end_month,
+    }
+
+    return start_month, end_month, date_parts
 
 
 def book_metrics_data(books, start_date, end_date):
@@ -65,5 +103,44 @@ def book_metrics_data(books, start_date, end_date):
         all_book_data.append(book_data)
 
     return all_book_data
+
+
+def book_metrics_by_month(books, date_parts):
+    metrics = models.BookAccess.objects.all()
+
+    start_str = '{}-01'.format(date_parts.get('start_unsplit'))
+    end_str = '{}-27'.format(date_parts.get('end_unsplit'))
+
+    start = datetime.strptime(start_str, '%Y-%m-%d').date()
+    end = datetime.strptime(end_str, '%Y-%m-%d').date()
+
+    dates = [start]
+
+    while start < end:
+        start += relativedelta(months=1)
+        if start < end:
+            dates.append(start)
+
+    data = []
+
+    for book in books:
+        book_metrics = metrics.filter(book=book)
+        book_data = {'book': book, 'all_metrics': book_metrics}
+
+        date_metrics_list = []
+
+        for date in dates:
+            date_metrics = book_metrics.filter(
+                accessed__month=date.month,
+                accessed__year=date.year,
+            )
+            date_metrics_list.append(date_metrics.count())
+
+        book_data['date_metrics'] = date_metrics_list
+
+        data.append(book_data)
+
+    return data, dates
+
 
 

@@ -276,3 +276,23 @@ def book_metrics_by_month(request):
     :param request: HttpRequest
     :return: HttpResponse
     """
+    start_month, end_month, date_parts = logic.get_start_and_end_months(request)
+    books = models.Book.objects.all()
+
+    month_form = forms.MonthForm(
+        initial={
+            'start_month': start_month, 'end_month': end_month,
+        }
+    )
+
+    data, dates = logic.book_metrics_by_month(books, date_parts)
+
+    template = 'books/metrics_by_month.html'
+    context = {
+        'month_form': month_form,
+        'books': books,
+        'data': data,
+        'dates': dates,
+    }
+
+    return render(request, template, context)
