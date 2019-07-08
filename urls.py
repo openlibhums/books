@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^admin/import/(?P<uuid>.+)/process/$', views.import_books_process, name='books_import_process'),
     url(r'^admin/import/(?P<uuid>.+)/$', views.import_books_preview, name='books_import_preview'),
 
+    url(r'^admin/metrics/$', views.book_metrics, name='books_metrics'),
 
 
     url(r'^onix/export/$', views.export_onix_xml, name='books_export_onix_xml'),

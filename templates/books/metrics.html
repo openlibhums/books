@@ -1,0 +1,93 @@
+{% extends "admin/core/base.html" %}
+
+{% block title %}Books Admin{% endblock title %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+{% endblock %}
+
+
+{% block body %}
+    <div class="large-12 columns">
+        <div class="box">
+            <div class="title-area">
+                <h2>Date Filters</h2>
+            </div>
+            <form method="GET">
+                {{ date_form.errors|safe }}
+                <div class="large-4 columns">
+                    {{ date_form.start_date }}
+                </div>
+                <div class="large-4 columns">
+                    {{ date_form.end_date }}
+                </div>
+                <div class="large-2 columns end">
+                    <button class="button">Submit</button>
+                </div>
+            </form>
+            <div class="title-area">
+                <h2>Books Metrics</h2>
+            </div>
+            <table id="books" class="table table-striped small books">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Subtile</th>
+                    <th>First Author</th>
+                    <th>Date Published</th>
+                    <th>Reads</th>
+                    <th>Downloads</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for book_data in data %}
+                    <tr>
+                        <td>{{ book_data.book.pk }}</td>
+                        <td>
+                            <a href="{% url 'books_edit_book' book_data.book.pk %}">{{ book_data.book.title }}</a>
+                        </td>
+                        <td>{{ book_data.book.subtitle }}</td>
+                        <td>{{ book_data.book.first_contributor }}</td>
+                        <td>{{ book_data.book.date_published|date:"Y-m-d" }}</td>
+                        <td>{{ book_data.views }}</td>
+                        <td>{{ book_data.downloads }}</td>
+                    </tr>
+                    {% empty %}
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="title-area">
+                <h2>Format Metrics</h2>
+            </div>
+            <table class="table table-striped small books">
+                <thead>
+                <tr>
+                    <th>Format</th>
+                    <th>Book</th>
+                    <th>Views</th>
+                    <td>Downloads</td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for book_data in data %}
+                    {% for format_data in book_data.formats %}
+                        <tr>
+                            <td>{{ format_data.format }}</td>
+                            <td>{{ format_data.format.book.title }}</td>
+                            <td>{{ format_data.views }}</td>
+                            <td>{{ format_data.downloads }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock body %}
+
+{% block js %}
+    {% include "elements/datatables.html" with target=".books" %}
+{% endblock js %}

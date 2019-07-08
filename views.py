@@ -7,7 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import Http404
 
-from plugins.books import models, forms, files
+from plugins.books import models, forms, files, logic
 from core import files as core_files
 
 
@@ -241,3 +241,38 @@ def export_onix_xml(request, book_id=None):
     }
 
     return render(request, template, context)
+
+
+@staff_member_required
+def book_metrics(request):
+    """
+    Fetches a list of books and displays their metrics between two dates.
+    :param request: HttpRequest
+    :return: HttpResponse
+    """
+    start_date, end_date = logic.get_start_and_end_date(request)
+    date_form = forms.DateForm(
+        initial={'start_date': start_date, 'end_date': end_date}
+    )
+
+    books = models.Book.objects.filter(date_published__isnull=False)
+
+    data = logic.book_metrics_data(books, start_date, end_date)
+
+    template = 'books/metrics.html'
+    context = {
+        'books': books,
+        'data': data,
+        'date_form': date_form,
+    }
+
+    return render(request, template, context)
+
+
+@staff_member_required
+def book_metrics_by_month(request):
+    """
+    Fetches a list of books and displays their usage by month.
+    :param request: HttpRequest
+    :return: HttpResponse
+    """
