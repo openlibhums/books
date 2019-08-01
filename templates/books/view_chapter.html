@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if chapter.number %}[{{ chapter.number }}] {% endif %}
+    {{ chapter.title }}{% endblock %}
+
+{% block body %}
+    <section class="content">
+        <div class="row">
+            <div class="box journal">
+                <div class="large-3 columns">
+                    <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
+
+                    {% if not books %}
+                        <p>
+                            <br/>
+                            <a class="button" href="{% url 'books_book' book.pk %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to {{ book.full_title }}</a>
+                        </p>
+                    {% endif %}
+                </div>
+                <div class="large-7 columns">
+                    <h2>{{ chapter.title }}</h2>
+                    <h3><em>{% for contributor in chapter.contributors.all %}{% if not forloop.first and not forloop.last %},
+            {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h3>
+                    <p>This chapter is part of: {{ book.citation|safe }}</p>
+                    <a href="{% url 'books_download_chapter' book.pk chapter.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download Chapter</a>
+                    <table class="table" style="margin-bottom: 0;">
+                        <tr>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ chapter.description|safe }}
+                            </td>
+                        </tr>
+                    </table>
+                    <ul class="accordion" data-accordion
+                        data-allow-all-closed="true">
+                        <li class="accordion-item" data-accordion-item>
+                            <a href="#" class="accordion-title">Details</a>
+                            <div class="accordion-content" data-tab-content>
+                                <table class="table small">
+                                    <tr>
+                                        <th>Published</th>
+                                        <th>Published By</th>
+                                        <th>Pages</th>
+                                        {% if chapter.doi %}
+                                            <th>DOI</th>{% endif %}
+                                    </tr>
+                                    <tr>
+                                        <td>{{ book.date_published }}</td>
+                                        <td>{{ book.publisher_name }}</td>
+                                        <td>{{ chapter.pages }}</td>
+                                        {% if chapter.doi %}
+                                            <td>{{ chapter.doi }}</td>{% endif %}
+                                    </tr>
+                                </table>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="large-2 columns">
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+{% endblock body %}

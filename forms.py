@@ -1,8 +1,42 @@
 from django import forms
+from django.forms import SelectMultiple
+from django.template.loader import render_to_string
 
 from django_summernote.widgets import SummernoteWidget
 
 from plugins.books import models, files
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
+class MonthInput(forms.DateInput):
+    input_type = 'month'
+
+
+class TableMultiSelect(SelectMultiple):
+    def __init__(self, *args, **kwargs):
+        items = kwargs.pop('items')
+        super(TableMultiSelect, self).__init__(*args, **kwargs)
+        self.items = items
+        self.queryset = self.get_queryset()
+
+    def get_queryset(self):
+        pks = [row.get('object', None).pk for row in self.items if row.get('object', None)]
+        return models.Contributor.objects.filter(pk__in=pks)
+
+    def render(self, name, value, attrs=None, choices=()):
+        value_for_template = [int(val) for val in value] if value else None
+        context = {
+            'items': self.items,
+            'name': name,
+            'value': value_for_template,
+        }
+        return render_to_string(
+            'books/forms/table_mult_select.html',
+            context,
+        )
 
 
 class BookForm(forms.ModelForm):
@@ -11,7 +45,8 @@ class BookForm(forms.ModelForm):
         model = models.Book
         exclude = ('',)
         widgets = {
-            'description': SummernoteWidget()
+            'description': SummernoteWidget(),
+            'date_published': DateInput(),
         }
 
 
@@ -30,7 +65,7 @@ class ContributorForm(forms.ModelForm):
 
 class FormatForm(forms.ModelForm):
 
-    file = forms.FileField(required=True)
+    file = forms.FileField()
 
     class Meta:
         model = models.Format
@@ -53,12 +88,34 @@ class FormatForm(forms.ModelForm):
         return cleaned_data
 
 
-class DateInput(forms.DateInput):
-    input_type = 'date'
+class ChapterForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        items = kwargs.pop('items', None)
+        super(ChapterForm, self).__init__(*args, **kwargs)
+        self.fields['contributors'].widget = TableMultiSelect(items=items)
 
-class MonthInput(forms.DateInput):
-    input_type = 'month'
+    file = forms.FileField(required=False)
+
+    class Meta:
+        model = models.Chapter
+        exclude = ('book', 'filename')
+
+    def save(self, commit=True, book=None, *args, **kwargs):
+        save_chapter = super(ChapterForm, self).save(commit=False)
+
+        if book:
+            save_chapter.book = book
+
+        file = self.cleaned_data["file"]
+        if file:
+            filename = files.save_file_to_disk(file, save_chapter)
+            save_chapter.filename = filename
+
+        if commit:
+            save_chapter.save()
+
+        return save_chapter
 
 
 class DateForm(forms.Form):

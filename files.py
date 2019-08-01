@@ -58,6 +58,35 @@ def serve_book_file(book_format):
         raise Http404
 
 
+def server_chapter_file(book_chapter):
+    file_path = os.path.join(
+        settings.BASE_DIR,
+        'files',
+        'press',
+        'books',
+        book_chapter.filename,
+    )
+
+    if os.path.isfile(file_path):
+        filename, extension = os.path.splitext(book_chapter.filename)
+        response = StreamingHttpResponse(
+            FileWrapper(open(file_path, 'rb'), 8192),
+            content_type=files.guess_mime(book_chapter.filename),
+        )
+        response['Content-Length'] = os.path.getsize(file_path)
+        response['Content-Disposition'] = 'attachment;' \
+                                          ' filename="{0}{1}"'.format(
+            slugify(book_chapter.title),
+            extension
+        )
+
+        return response
+    else:
+        raise Http404
+
+
+
+
 def get_file_path(book_format):
     return os.path.join(settings.BASE_DIR, 'files', 'press', 'books', book_format.filename)
 

@@ -5,7 +5,7 @@
         <div class="large-3 columns">
             <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
 
-            {% if not books %}<p><a href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
+            {% if not books %}<p><br /><a class="button" href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
         </div>
         <div class="{% if books %}large-9 columns{% else %}large-7 columns{% endif %}">
             {% if book.is_open_access %}
@@ -28,26 +28,22 @@
                     <th>Description</th>
                 </tr>
                 <tr>
-                    <td>{{ book.description|safe }}</td>
+                    <td>
+                        {{ book.description|safe }}
+                        {% if books %}
+                        <p>
+                            <a href="{% url 'books_book' book.pk %}">View more detail <i class="fa fa-arrow-right"></i></a>
+                        </p>
+                        {% endif %}
+                    </td>
                 </tr>
             </table>
 
-            <table class="table scroll">
-                <tr>
-                    <th>Published</th>
-                    <th>Published By</th>
-                    <th>Pages</th>
-                    {% if book.isbn %}<th>ISBN</th>{% endif %}
-                    {% if book.doi %}<th>DOI</th>{% endif %}
-                </tr>
-                <tr>
-                    <td>{{ book.date_published }}</td>
-                    <td>{{ book.publisher_name }}</td>
-                    <td>{{ book.pages }}</td>
-                    {% if book.isbn %}<td>{{ book.isbn }}</td>{% endif %}
-                    {% if book.doi %}<td>{{ book.doi }}</td>{% endif %}
-                </tr>
-            </table>
+            {% with chapters=book.chapter_set.all %}
+                {% if not books %}
+                    {% include "books/elements/detail.html" %}
+                {% endif %}
+            {% endwith %}
 
         </div>
 

@@ -27,7 +27,11 @@ def index(request):
 
 
 def view_book(request, book_id):
-    book = get_object_or_404(models.Book, pk=book_id, date_published__isnull=False)
+    book = get_object_or_404(
+        models.Book,
+        pk=book_id,
+        date_published__isnull=False,
+    )
 
     template = 'books/book.html'
     context = {
@@ -70,6 +74,27 @@ def read_epub(request, book_id, format_id):
 
     return render(request, template, context)
 
+
+def download_chapter(request, book_id, chapter_id, mark_download='yes'):
+    # Forcing a session to be created where people link directly to the book.
+    request.session.save()
+
+    book = get_object_or_404(
+        models.Book,
+        pk=book_id,
+        date_published__isnull=False,
+    )
+    chapter = get_object_or_404(
+        models.Chapter,
+        pk=chapter_id,
+        book=book,
+    )
+
+    if mark_download == 'yes':
+        chapter.add_book_access(request, 'download')
+
+    # Handle serving the file here
+    return files.server_chapter_file(chapter)
 
 
 @staff_member_required
@@ -293,6 +318,80 @@ def book_metrics_by_month(request):
         'books': books,
         'data': data,
         'dates': dates,
+    }
+
+    return render(request, template, context)
+
+
+@staff_member_required
+def books_chapter(request, book_id, chapter_id=None):
+    """
+    Allows for creation of new or editing of existing chapters.
+    :param request: HttpRequest object
+    :pram book_id: int Book object pk
+    :param chapter_id: optional int Chapter object pk
+    :return: HttpResponse or HttpRedirect
+    """
+    book = get_object_or_404(models.Book, pk=book_id)
+    chapter = None
+    if chapter_id:
+        chapter = get_object_or_404(models.Chapter, pk=chapter_id)
+
+    form = forms.ChapterForm(
+        instance=chapter,
+        items=logic.get_chapter_contributor_items(book),
+        initial={
+            'sequence': book.get_next_chapter_sequence() if not chapter else chapter.sequence,
+        }
+    )
+
+    if request.POST:
+        form = forms.ChapterForm(
+            request.POST,
+            request.FILES,
+            instance=chapter,
+            items=logic.get_chapter_contributor_items(book),
+        )
+        form.save(book=book)
+        form.save_m2m()
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            'Chapter Saved.',
+        )
+
+        return redirect(
+            reverse(
+                'books_edit_book',
+                kwargs={'book_id': book.pk},
+            )
+        )
+
+    template = 'books/chapter.html'
+    context = {
+        'form': form,
+        'book': book,
+        'chapter': chapter,
+    }
+
+    return render(request, template, context)
+
+
+def view_chapter(request, book_id, chapter_id):
+    """
+    Displays details of a chapter.
+    :param request: HttpRequest object
+    :param book_id: Book object PK
+    :param chapter_id: Chapter object PK
+    :return: HttpResponse
+    """
+    book = get_object_or_404(models.Book, pk=book_id)
+    chapter = get_object_or_404(models.Chapter, pk=chapter_id)
+
+    template = 'books/view_chapter.html'
+    context = {
+        'book': book,
+        'chapter': chapter,
     }
 
     return render(request, template, context)

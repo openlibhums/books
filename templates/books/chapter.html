@@ -1,0 +1,35 @@
+{% extends "admin/core/base.html" %}
+{% load foundation %}
+
+{% block title %}Books Admin{% endblock title %}
+{% block admin-header %}Books Admin{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+    <li><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></li>
+    <li>{% if chapter %}Edit Chapter{% else %}Add Chapter{% endif %}</li>
+{% endblock %}
+
+{% block body %}
+    <div class="box">
+        <div class="row expanded">
+            <div class="title-area">
+                <h2>{% if chapter %}Edit Chapter{% else %}Add Chapter{% endif %}</h2>
+            </div>
+            <div class="content">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% include "admin/elements/forms/errors.html" %}
+                    {{ form|foundation }}
+                    <div class="row expanded">
+                        <div class="large-12 columns">
+                            {% if chapter.filename %}<p>Current file: <a href="{% url 'books_download_chapter' book.pk chapter.pk %}">{{ chapter.filename }}</a></p>{% endif %}
+                        </div>
+                    </div>
+                    <button class="success button" name="submit">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -143,4 +143,21 @@ def book_metrics_by_month(books, date_parts):
     return data, dates
 
 
+def get_chapter_contributor_items(book):
+    contributors = models.Contributor.objects.filter(
+        book=book,
+    )
+    items = list()
+    items.append({'object': None, 'cells': ['First Name', 'Last Name', 'Email']})
+
+    for contributor in contributors:
+        item = [
+            contributor.first_name,
+            contributor.last_name,
+            contributor.email,
+        ]
+        items.append({'object': contributor, 'cells': item})
+
+    return items
+
 

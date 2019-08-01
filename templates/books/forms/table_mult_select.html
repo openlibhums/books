@@ -1,0 +1,17 @@
+<table class="table table-striped">
+    {% for row in items %}
+        <tr>
+            {% if row.object %}
+                <td><input type="checkbox" name="{{ name }}" value="{{ row.object.pk }}" {% if row.object.pk in value %}checked{% endif %}></td>
+                {% for cell in row.cells %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+            {% else %}
+                <th></th>
+                {% for cell in row.cells %}
+                <th>{{ cell }}</th>
+                {% endfor %}
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>

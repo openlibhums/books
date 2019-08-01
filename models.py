@@ -40,7 +40,10 @@ class Book(models.Model):
 
     is_edited_volume = models.BooleanField(default=False)
     is_open_access = models.BooleanField(default=True)
-    date_published = models.DateField(blank=True, null=True)
+    date_published = models.DateField(
+        blank=True,
+        null=True,
+    )
 
     publisher_name = models.CharField(max_length=100)
     publisher_loc = models.CharField(max_length=100, verbose_name='Publisher location')
@@ -53,6 +56,28 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
+
+    def citation(self):
+        return "{authors} {year}. <em>{title}</em>".format(
+            authors=self.contributors_citation(),
+            year=self.date_published.year,
+            title=self.full_title(),
+        )
+
+    def contributors_citation(self):
+        contributors = self.contributor_set.all()
+
+        if contributors.count() == 1:
+            return '{contributor} '.format(
+                contributor=contributors[0].citation_name()
+            )
+        elif contributors.count() == 2:
+            return '{contributor_one} & {contributor_two} '.format(
+                contributor_one=contributors[0].citation_name(),
+                contributor_two=contributors[1].citation_name(),
+            )
+        else:
+            return '{contributor} et al. '.format(contributor=contributors[0])
 
     def full_title(self):
         if self.prefix and self.subtitle:
@@ -77,6 +102,10 @@ class Book(models.Model):
             return last_contributor.sequence + 1
         else:
             return 1
+
+    def get_next_chapter_sequence(self):
+        chapter_sequences = [c.sequence for c in self.chapter_set.all()]
+        return max(chapter_sequences) + 1
 
     def cover_onix_code(self):
         mapping = {
@@ -132,6 +161,12 @@ class Contributor(models.Model):
     def middle_initial(self):
         if self.middle_name:
             return '{middle_initial}.'.format(middle_initial=self.middle_name[0])
+
+    def citation_name(self):
+        return '{last_name} {first_initial}.'.format(
+            last_name=self.last_name,
+            first_initial=self.first_name[0],
+        )
 
 
 class Format(models.Model):
@@ -200,11 +235,96 @@ def access_choices():
 
 class BookAccess(models.Model):
     book = models.ForeignKey(Book)
+    chapter = models.ForeignKey('Chapter', blank=True, null=True)
     type = models.CharField(max_length=20, choices=access_choices())
-    format = models.ForeignKey(Format)
+    format = models.ForeignKey(Format, blank=True, null=True)
     accessed = models.DateTimeField(default=timezone.now)
     country = models.ForeignKey('core.Country', null=True, blank=True)
     identifier = models.CharField(max_length=100)
 
     def __str__(self):
-        return '[{0}] - {1} at {2}'.format(self.format, self.book.title, self.accessed)
+        return '[{0}] - {1} at {2}'.format(
+            self.format,
+            self.book.title,
+            self.accessed,
+        )
+
+
+class Chapter(models.Model):
+    book = models.ForeignKey(Book)
+    title = models.CharField(
+        max_length=255,
+    )
+    description = models.TextField()
+    pages = models.PositiveIntegerField()
+    doi = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name='DOI',
+        help_text='10.xxx/1234',
+    )
+    number = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text='The chapter number eg. 1',
+    )
+    sequence = models.PositiveIntegerField(
+        help_text='The order in which the chapters should appear.',
+    )
+    contributors = models.ManyToManyField(
+        Contributor,
+        null=True,
+        related_name='chapter_contributors',
+    )
+    filename = models.CharField(
+        max_length=255,
+    )
+
+    class Meta:
+        ordering = ('sequence', 'number',)
+
+    def __str__(self):
+        return '[{0}] {1} ({2})'.format(
+            self.number,
+            self.title,
+            self.book.title,
+        )
+
+    def add_book_access(self, request, access_type='download'):
+        try:
+            user_agent = parse_ua_string(request.META.get('HTTP_USER_AGENT', None))
+        except TypeError:
+            user_agent = None
+
+        ip = get_ip_address(request)
+        iso_country_code = get_iso_country_code(ip)
+        identifier = request.session.session_key
+
+        try:
+            country = core_models.Country.objects.get(
+                code=iso_country_code,
+            )
+        except core_models.Country.DoesNotExist:
+            country = None
+
+        if user_agent and not user_agent.is_bot:
+
+            # check if the current IP has accessed this article recently.
+            time_to_check = timezone.now() - timedelta(seconds=10)
+            check = BookAccess.objects.filter(
+                book=self.book,
+                chapter=self,
+                accessed__gte=time_to_check,
+                type=access_type,
+                identifier=identifier,
+            ).count()
+
+            if not check:
+                BookAccess.objects.create(
+                    book=self.book,
+                    chapter=self,
+                    type=access_type,
+                    country=country,
+                    identifier=identifier,
+                )
