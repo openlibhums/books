@@ -56,6 +56,9 @@ def download_format(request, book_id, format_id, mark_download='yes'):
 
 
 def read_epub(request, book_id, format_id):
+    # Forcing a session to be created where people link directly to the book.
+    request.session.save()
+
     book = get_object_or_404(models.Book, pk=book_id)
     format = get_object_or_404(models.Format, pk=format_id, book=book)
 
