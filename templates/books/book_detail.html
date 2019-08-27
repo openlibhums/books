@@ -52,8 +52,10 @@
                 <h3>Book Metrics</h3>
                 <h4>{{ book.metrics.downloads }}</h4>
                 <p>Downloads</p>
+                {% if book.metrics.views %}
                 <h4>{{ book.metrics.views }}</h4>
-                <p>Views</p>
+                <p>EPUB Views</p>
+                {% endif %}
             </div>
         {% endif %}
     </div>
