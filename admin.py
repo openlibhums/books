@@ -12,11 +12,17 @@ class ChapterAdmin(admin.ModelAdmin):
     filter_horizontal = ('contributors',)
 
 
+class BookAccessAdmin(admin.ModelAdmin):
+    list_display = ('book', 'chapter', 'type', 'format', 'country', 'accessed')
+    list_filter = ('book',)
+    search_fields = ('book__title',)
+
+
 admin_list = [
     (Book, ),
     (Contributor,),
     (Format,),
-    (BookAccess,),
+    (BookAccess, BookAccessAdmin),
     (Chapter, ChapterAdmin),
 ]
 
