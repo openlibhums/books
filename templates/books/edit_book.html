@@ -63,15 +63,21 @@
                 </div>
                 <div class="title-area">
                     <h2>Chapters</h2>
+                    {% if book %}
                     <a class="button" href="{% url 'books_new_chapter' book.pk %}"><i class="fa fa-file">&nbsp;</i>Add Chapter</a>
+                    {% endif %}
                 </div>
                 <div class="content">
                     <ul class="list-group">
-                        {% for chapter in book.chapter_set.all %}
-                            <li class="list-group-item"><a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{% if chapter.number %}[{{ chapter.number }}] {{ chapter.title }}{% endif %}</a></li>
-                        {% empty %}
-                        <li class="list-group-item list-group-item-info">No chapters</li>
-                        {% endfor %}
+                        {% if book %}
+                            {% for chapter in book.chapter_set.all %}
+                                <li class="list-group-item"><a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{% if chapter.number %}[{{ chapter.number }}] {{ chapter.title }}{% endif %}</a></li>
+                            {% empty %}
+                            <li class="list-group-item list-group-item-info">No chapters</li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item list-group-item-danger">Save book before adding chapters.</li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
