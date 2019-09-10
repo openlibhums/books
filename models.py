@@ -105,7 +105,11 @@ class Book(models.Model):
 
     def get_next_chapter_sequence(self):
         chapter_sequences = [c.sequence for c in self.chapter_set.all()]
-        return max(chapter_sequences) + 1
+
+        if chapter_sequences:
+            return max(chapter_sequences) + 1
+        else:
+            return 0
 
     def cover_onix_code(self):
         mapping = {
