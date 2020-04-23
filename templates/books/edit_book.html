@@ -71,7 +71,7 @@
                     <ul class="list-group">
                         {% if book %}
                             {% for chapter in book.chapter_set.all %}
-                                <li class="list-group-item"><a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{% if chapter.number %}[{{ chapter.number }}] {{ chapter.title }}{% endif %}</a></li>
+                                <li class="list-group-item"><a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{% if chapter.number %}[{{ chapter.number }}]{% endif %} {{ chapter.title }}</a></li>
                             {% empty %}
                             <li class="list-group-item list-group-item-info">No chapters</li>
                             {% endfor %}
