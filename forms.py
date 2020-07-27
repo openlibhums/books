@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import SelectMultiple
 from django.template.loader import render_to_string
+from django.utils.text import slugify
 
 from django_summernote.widgets import SummernoteWidget
 
@@ -126,3 +127,18 @@ class DateForm(forms.Form):
 class MonthForm(forms.Form):
     start_month = forms.DateField(widget=MonthInput())
     end_month = forms.DateField(widget=MonthInput())
+
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = models.Category
+        fields = ('name',)
+
+    def save(self, commit=True):
+        save_category = super(CategoryForm, self).save(commit=False)
+        save_category.slug = slugify(save_category.name)
+
+        if commit:
+            save_category.save()
+
+        return save_category
