@@ -3,6 +3,7 @@ import os
 from mimetypes import guess_type
 from datetime import timedelta
 import magic
+from urllib.parse import urlparse
 
 from user_agents import parse as parse_ua_string
 
@@ -53,6 +54,20 @@ class Book(models.Model):
     isbn = models.CharField(max_length=30, blank=True, null=True, verbose_name='ISBN')
 
     purchase_url = models.URLField(null=True, blank=True)
+
+    remote_url = models.URLField(
+        null=True,
+        blank=True,
+        help_text='Set this if you want to have your book link out to a remote'
+                  'website rather than local formats.'
+    )
+    remote_label = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Label for the remote link. If left blank will display as'
+                  '"View on yourremoteurldomain.com"',
+    )
 
     def __str__(self):
         return self.title
@@ -141,6 +156,14 @@ class Book(models.Model):
             'views': views.count(),
             'downloads': downloads.count(),
         }
+
+    def remote_book_label(self):
+        if self.remote_label:
+            return self.remote_label
+        else:
+            return 'View on {}'.format(
+                urlparse(self.remote_url).netloc
+            )
 
 
 class Contributor(models.Model):
