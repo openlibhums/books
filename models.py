@@ -58,14 +58,14 @@ class Book(models.Model):
     remote_url = models.URLField(
         null=True,
         blank=True,
-        help_text='Set this if you want to have your book link out to a remote'
+        help_text='Set this if you want to have your book link out to a remote '
                   'website rather than local formats.'
     )
     remote_label = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text='Label for the remote link. If left blank will display as'
+        help_text='Label for the remote link. If left blank will display as '
                   '"View on yourremoteurldomain.com"',
     )
 
