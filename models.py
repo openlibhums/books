@@ -16,9 +16,10 @@ from metrics.logic import get_iso_country_code
 from utils.shared import get_ip_address
 from core import models as core_models
 from plugins.books import files
+from core.file_system import JanewayFileSystemStorage
 
 
-fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+fs = JanewayFileSystemStorage()
 
 
 def cover_images_upload_path(instance, filename):
