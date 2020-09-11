@@ -17,12 +17,15 @@
             <h6><em>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
             {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
 
-            {% for format in book.format_set.all %}
-                <a href="{% url 'books_download_format' book.pk format.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download {{ format.title }}</a>
-                {% if format.is_epub %}<a href="{% url 'books_read_epub' book.pk format.pk %}" target="_blank" class="button"><i class="fa fa-book">&nbsp;</i> Read this Book</a>{% endif %}
-            {% endfor %}
-            {% if book.purchase_url %}<a href="{{ book.purchase_url }}" class="button" target="_blank"><i class="fa fa-external-link"></i>&nbsp;Buy this Book</a>{% endif %}
-
+            {% if book.remote_url %}
+                <a href="{{ book.remote_url }}" class="button">{{ book.remote_book_label }} <span class="fa fa-external-link" aria-hidden="true"></span></a>
+            {% else %}
+                {% for format in book.format_set.all %}
+                    <a href="{% url 'books_download_format' book.pk format.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download {{ format.title }}</a>
+                    {% if format.is_epub %}<a href="{% url 'books_read_epub' book.pk format.pk %}" target="_blank" class="button"><i class="fa fa-book">&nbsp;</i> Read this Book</a>{% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if book.purchase_url %}<a href="{{ book.purchase_url }}" class="button" target="_blank">Buy this Book <span class="fa fa-external-link" aria-hidden="true"></span></a>{% endif %}
             <table class="table" style="margin-bottom: 0;">
                 <tr>
                     <th>Description</th>
