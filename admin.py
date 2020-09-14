@@ -24,6 +24,7 @@ admin_list = [
     (Format,),
     (BookAccess, BookAccessAdmin),
     (Chapter, ChapterAdmin),
+    (Category,),
 ]
 
 [admin.site.register(*t) for t in admin_list]

@@ -11,16 +11,25 @@ from plugins.books import models, forms, files, logic
 from core import files as core_files
 
 
-def index(request):
+def index(request, category_slug=None):
+    category = None
     books = models.Book.objects.filter(
         date_published__isnull=False,
     ).order_by(
         '-date_published',
     )
 
+    if category_slug:
+        category = get_object_or_404(
+            models.Category,
+            slug=category_slug,
+        )
+        books.filter(category=category)
+
     template = 'books/index.html'
     context = {
         'books': books,
+        'category': category,
     }
 
     return render(request, template, context)
@@ -395,6 +404,68 @@ def view_chapter(request, book_id, chapter_id):
     context = {
         'book': book,
         'chapter': chapter,
+    }
+
+    return render(request, template, context)
+
+@staff_member_required
+def categories(request, category_id=None):
+    """
+    Lists all categories.
+    """
+    all_categories = models.Category.objects.all()
+    category, fire_redirect = None, False
+
+    if category_id:
+        category = get_object_or_404(
+            models.Category,
+            pk=category_id,
+        )
+
+    form = forms.CategoryForm(instance=category)
+
+    if request.POST:
+
+        if 'delete' in request.POST:
+            delete_id = request.POST.get('delete')
+            get_object_or_404(
+                models.Category,
+                pk=delete_id,
+            ).delete()
+            messages.add_message(
+                request,
+                messages.ERROR,
+                'Category deleted',
+            )
+            fire_redirect = True
+
+        if 'save' in request.POST:
+            form = forms.CategoryForm(
+                request.POST,
+                instance=category,
+            )
+
+            if form.is_valid():
+                form.save()
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    'Category saved.',
+                )
+                fire_redirect = True
+
+        if fire_redirect:
+            return redirect(
+                reverse(
+                    'books_categories',
+                )
+            )
+
+
+    template = 'books/categories.html'
+    context = {
+        'categories': all_categories,
+        'form': form,
     }
 
     return render(request, template, context)

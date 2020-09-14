@@ -5,7 +5,12 @@
 {% block body %}
     <section class="content">
         <div class="row">
+            {% if not category %}
             <h4>Published Books</h4>
+            {% else %}
+            <h4>Category: {{ category.name }}</h4>
+                <a href="{% url 'books_index' %}" class="button">< Back to All</a>
+            {% endif %}
 
             {% for book in books %}
                 <div class="box journal">

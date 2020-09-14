@@ -17,9 +17,10 @@ from metrics.logic import get_iso_country_code
 from utils.shared import get_ip_address
 from core import models as core_models
 from plugins.books import files
+from core.file_system import JanewayFileSystemStorage
 
 
-fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+fs = JanewayFileSystemStorage()
 
 
 def cover_images_upload_path(instance, filename):
@@ -32,10 +33,28 @@ def cover_images_upload_path(instance, filename):
     return os.path.join(path, filename)
 
 
+
+class Category(models.Model):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
+
+    class Meta:
+        ordering = ('slug',)
+
+    def __str__(self):
+        return self.name
+
+
 class Book(models.Model):
     prefix = models.CharField(max_length=20, blank=True, null=True)
     title = models.CharField(max_length=300)
     subtitle = models.CharField(max_length=300, blank=True, null=True)
+    category = models.ForeignKey(
+        Category,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     description = models.TextField()
     pages = models.PositiveIntegerField()
 

@@ -27,6 +27,14 @@
             {% endif %}
             {% if book.purchase_url %}<a href="{{ book.purchase_url }}" class="button" target="_blank">Buy this Book <span class="fa fa-external-link" aria-hidden="true"></span></a>{% endif %}
             <table class="table" style="margin-bottom: 0;">
+                {% if book.category %}
+                <tr>
+                    <th>Category</th>
+                </tr>
+                <tr>
+                    <td><a href="{% url 'books_index_category' book.category.slug %}">{{ book.category.name }}</a></td>
+                </tr>
+                {% endif %}
                 <tr>
                     <th>Description</th>
                 </tr>

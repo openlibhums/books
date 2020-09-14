@@ -13,10 +13,11 @@
         <div class="box">
             <div class="title-area">
                 <h2>Books</h2>
-                <a href="{% url 'books_new_book' %}" class="button"><i class="fa fa-plus">&nbsp;</i>Add New Book</a>
-                <a href="{% url 'books_import_books_upload' %}" class="button"><i class="fa fa-upload">&nbsp;</i>Import Books</a>
-                <a href="{% url 'books_metrics' %}" class="button"><i class="fa fa-list-ol">&nbsp;</i> Metrics</a>
-                <a href="{% url 'books_metrics_by_month' %}" class="button"><i class="fa fa-list-ol">&nbsp;</i> Metrics by Month</a>
+                <a href="{% url 'books_new_book' %}" class="button"><i class="fa fa-plus" aria-hidden="true">&nbsp;</i>Add New Book</a>
+                <a href="{% url 'books_categories' %}" class="button"><i class="fa fa-clipboard" aria-hidden="true">&nbsp;</i>Categories</a>
+                <a href="{% url 'books_import_books_upload' %}" class="button"><i class="fa fa-upload" aria-hidden="true">&nbsp;</i>Import Books</a>
+                <a href="{% url 'books_metrics' %}" class="button"><i class="fa fa-list-ol" aria-hidden="true">&nbsp;</i> Metrics</a>
+                <a href="{% url 'books_metrics_by_month' %}" class="button"><i class="fa fa-list-ol" aria-hidden="true">&nbsp;</i> Metrics by Month</a>
             </div>
             <table id="books">
                 <thead>
