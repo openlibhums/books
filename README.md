@@ -5,4 +5,3 @@ This is not a comprehensive platform for the production of books and if you are 
 
 To install: clone or download into plugins/ folder and then run the install_plugins command.
 
-v 1.0
