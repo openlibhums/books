@@ -34,7 +34,7 @@
                             <tbody>
                             {% for category in categories %}
                                 <tr>
-                                    <td>{{ category.name }}</td>
+                                    <td><a href="{% url 'books_index_category' category.slug %}" target="_blank">{{ category.name }} <i class="fa fa-external-link" aria-hidden="true"></i></a></td>
                                     <td>{{ category.book_set.count }}</td>
                                     <td><a href="{% url 'books_edit_category' category.pk %}"
                                            class="button secondary small">Edit</a></td>

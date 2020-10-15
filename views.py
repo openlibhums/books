@@ -24,7 +24,7 @@ def index(request, category_slug=None):
             models.Category,
             slug=category_slug,
         )
-        books.filter(category=category)
+        books = books.filter(category=category)
 
     template = 'books/index.html'
     context = {
