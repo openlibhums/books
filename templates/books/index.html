@@ -1,14 +1,17 @@
 {% extends "core/base.html" %}
 
-{% block title %}Books{% endblock %}
+{% block title %}{% if not category %}Published Books{% else %}{{ category.name }}{% endif %}{% endblock %}
 
 {% block body %}
     <section class="content">
         <div class="row">
             {% if not category %}
-            <h4>Published Books</h4>
+                <h4>Published Books</h4>
             {% else %}
-            <h4>Category: {{ category.name }}</h4>
+                {% if category.display_title %}
+                <h4>Category: {{ category.name }}</h4>
+                {% endif %}
+                {{ category.description|safe }}
                 <a href="{% url 'books_index' %}" class="button">< Back to All</a>
             {% endif %}
 

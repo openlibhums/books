@@ -132,7 +132,14 @@ class MonthForm(forms.Form):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = models.Category
-        fields = ('name',)
+        fields = (
+            'name',
+            'description',
+            'display_title',
+        )
+        widgets = {
+            'description': SummernoteWidget,
+        }
 
     def save(self, commit=True):
         save_category = super(CategoryForm, self).save(commit=False)

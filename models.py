@@ -33,10 +33,17 @@ def cover_images_upload_path(instance, filename):
     return os.path.join(path, filename)
 
 
-
 class Category(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
+    description = models.TextField(
+        null=True,
+        blank=True,
+    )
+    display_title = models.BooleanField(
+        default=True,
+        help_text="Mark as false if you want to hide the category title.",
+    )
 
     class Meta:
         ordering = ('slug',)
