@@ -12,7 +12,7 @@
                     {% if book.doi %}
                         <th>DOI</th>{% endif %}
                     {% if chapters %}
-                        <th>{{ book.category.chapter_name_plural|capfirst }}</th>{% endif %}
+                        <th>{% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}Chapter{% endif %}</th>{% endif %}
                 </tr>
                 <tr>
                     <td>{{ book.date_published }}</td>
@@ -31,9 +31,9 @@
 
     {% if chapters %}
     <li class="accordion-item" data-accordion-item>
-        <a href="#" class="accordion-title">{{ book.category.chapter_name_plural|capfirst }}</a>
+        <a href="#" class="accordion-title">{% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}Chapter{% endif %}</a>
         <div class="accordion-content" data-tab-content>
-            <p>{{ book.full_title }} has the following {{ book.category.chapter_name_plural }}:
+            <p>{{ book.full_title }} has the following {% if book.category %}{{ book.category.chapter_name_plural }}{% else %}Chapter{% endif %}:
             <ul>
                 {% for chapter in chapters %}
                     <li><a href="{% url 'book_view_chapter' book.pk chapter.pk %}">{% if chapter.number %}
