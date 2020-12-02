@@ -136,6 +136,8 @@ class CategoryForm(forms.ModelForm):
             'name',
             'description',
             'display_title',
+            'chapter_name',
+            'chapter_name_plural',
         )
         widgets = {
             'description': SummernoteWidget,

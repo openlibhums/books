@@ -21,7 +21,7 @@
                     <h2>{{ chapter.title }}</h2>
                     <h3><em>{% for contributor in chapter.contributors.all %}{% if not forloop.first and not forloop.last %},
             {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h3>
-                    <p>This chapter is part of: {{ book.citation|safe }}</p>
+                    <p>This {{ book.category.chapter_name }} is part of: {{ book.citation|safe }}</p>
                     <a href="{% url 'books_download_chapter' book.pk chapter.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download Chapter</a>
                     <table class="table" style="margin-bottom: 0;">
                         <tr>

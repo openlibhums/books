@@ -44,6 +44,14 @@ class Category(models.Model):
         default=True,
         help_text="Mark as false if you want to hide the category title.",
     )
+    chapter_name = models.CharField(
+        max_length=200,
+        default='Chapter',
+    )
+    chapter_name_plural = models.CharField(
+        max_length=200,
+        default='Chapters',
+    )
 
     class Meta:
         ordering = ('slug',)
