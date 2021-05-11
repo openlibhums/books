@@ -9,6 +9,7 @@ from django.http import Http404
 
 from plugins.books import models, forms, files, logic
 from core import files as core_files
+from utils import setting_handler
 
 
 def index(request, category_slug=None):
@@ -30,6 +31,7 @@ def index(request, category_slug=None):
     context = {
         'books': books,
         'category': category,
+        'book_settings': models.BookSetting.objects.first(),
     }
 
     return render(request, template, context)

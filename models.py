@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.core.files.images import get_image_dimensions
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 from metrics.logic import get_iso_country_code
 from utils.shared import get_ip_address
@@ -31,6 +32,18 @@ def cover_images_upload_path(instance, filename):
 
     path = "cover_images/"
     return os.path.join(path, filename)
+
+
+class BookSetting(models.Model):
+    book_page_title = models.CharField(
+        max_length=255,
+        default="Published Books",
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.pk and BookSetting.objects.exists():
+            raise ValidationError('There is can be only one BookSetting instance')
+        return super(BookSetting, self).save(*args, **kwargs)
 
 
 class Category(models.Model):

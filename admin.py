@@ -3,6 +3,10 @@ from django.contrib import admin
 from plugins.books.models import *
 
 
+class BookSettingAdmin(admin.ModelAdmin):
+    list_display = ('book_page_title',)
+
+
 class ChapterAdmin(admin.ModelAdmin):
     """Displays objects in the Django admin interface."""
     list_display = ('title', 'number', 'book', 'pages', 'doi')
@@ -25,6 +29,7 @@ admin_list = [
     (BookAccess, BookAccessAdmin),
     (Chapter, ChapterAdmin),
     (Category,),
+    (BookSetting, BookSettingAdmin)
 ]
 
 [admin.site.register(*t) for t in admin_list]

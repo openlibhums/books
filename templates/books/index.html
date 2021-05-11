@@ -6,7 +6,7 @@
     <section class="content">
         <div class="row">
             {% if not category %}
-                <h4>Published Books</h4>
+                <h4>{{ book_settings.book_page_title }}</h4>
             {% else %}
                 {% if category.display_title %}
                 <h4>Category: {{ category.name }}</h4>
