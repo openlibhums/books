@@ -114,6 +114,9 @@ def book_metrics_by_month(books, date_parts):
     start = datetime.strptime(start_str, '%Y-%m-%d').date()
     end = datetime.strptime(end_str, '%Y-%m-%d').date()
 
+    current_year = date_parts.get('end_month_y')
+    previous_year = str(int(current_year) - 1)
+
     dates = [start]
 
     while start < end:
@@ -138,9 +141,14 @@ def book_metrics_by_month(books, date_parts):
 
         book_data['date_metrics'] = date_metrics_list
 
+        for year in [current_year, previous_year]:
+            book_data[year] = book_metrics.filter(
+                accessed__year=year,
+            ).count()
+
         data.append(book_data)
 
-    return data, dates
+    return data, dates, current_year, previous_year
 
 
 def get_chapter_contributor_items(book):

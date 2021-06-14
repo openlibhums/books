@@ -324,7 +324,7 @@ def book_metrics_by_month(request):
         }
     )
 
-    data, dates = logic.book_metrics_by_month(books, date_parts)
+    data, dates, current_year, previous_year = logic.book_metrics_by_month(books, date_parts)
 
     template = 'books/metrics_by_month.html'
     context = {
