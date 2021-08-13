@@ -65,6 +65,10 @@ class Category(models.Model):
         max_length=200,
         default='Chapters',
     )
+    buy_button_text = models.CharField(
+        max_length=100,
+        default="Buy this Book",
+    )
 
     class Meta:
         ordering = ('slug',)
@@ -114,6 +118,12 @@ class Book(models.Model):
         null=True,
         help_text='Label for the remote link. If left blank will display as '
                   '"View on yourremoteurldomain.com"',
+    )
+
+    license_information = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Add copyright and/or license information here.",
     )
 
     def __str__(self):
@@ -353,6 +363,12 @@ class Chapter(models.Model):
     )
     filename = models.CharField(
         max_length=255,
+    )
+    license_information = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Add copyright and/or license information here. "
+                  "If left blank will display book version of this field.",
     )
 
     class Meta:

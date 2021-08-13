@@ -54,6 +54,14 @@
                                         {% if chapter.doi %}
                                             <td>{{ chapter.doi }}</td>{% endif %}
                                     </tr>
+                                    {% if chapter.license_information or book.license_information %}
+                                        <tr>
+                                            <th colspan="100">License Information</th>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="100">{% if chapter.license_information %}{{ chapter.license_information }}{% else %}Book License Information: {{ book.license_information }}{% endif %}</td>
+                                        </tr>
+                                        {% endif %}
                                 </table>
                             </div>
                         </li>
