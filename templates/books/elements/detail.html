@@ -25,6 +25,14 @@
                     {% if chapters %}
                         <td>{{ chapters.count }}</td>{% endif %}
                 </tr>
+                {% if book.license_information %}
+                <tr>
+                    <th colspan="100">License Information</th>
+                </tr>
+                <tr>
+                    <td colspan="100">{{ book.license_information }}</td>
+                </tr>
+                {% endif %}
             </table>
         </div>
     </li>
