@@ -14,11 +14,12 @@ from django.core.files.images import get_image_dimensions
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
+from core import models as core_models
+from core.file_system import JanewayFileSystemStorage
+from core.model_utils import M2MOrderedThroughField
 from metrics.logic import get_iso_country_code
 from utils.shared import get_ip_address
-from core import models as core_models
 from plugins.books import files
-from core.file_system import JanewayFileSystemStorage
 
 
 fs = JanewayFileSystemStorage()
@@ -42,7 +43,7 @@ class BookSetting(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk and BookSetting.objects.exists():
-            raise ValidationError('There is can be only one BookSetting instance')
+            raise ValidationError('There can be only one BookSetting instance')
         return super(BookSetting, self).save(*args, **kwargs)
 
 
@@ -87,11 +88,15 @@ class Book(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    description = models.TextField()
-    pages = models.PositiveIntegerField()
+    description = models.TextField(null=True, blank=True)
+    pages = models.PositiveIntegerField(null=True, blank=True)
 
     is_edited_volume = models.BooleanField(default=False)
     is_open_access = models.BooleanField(default=True)
+    date_embargo = models.DateField(
+        blank=True,
+        null=True,
+    )
     date_published = models.DateField(
         blank=True,
         null=True,
@@ -124,6 +129,18 @@ class Book(models.Model):
         blank=True,
         null=True,
         help_text="Add copyright and/or license information here.",
+    )
+
+    keywords = M2MOrderedThroughField(
+        'submission.Keyword',
+        blank=True, null=True, through='books.KeywordBook',
+    )
+    publisher_notes = models.ManyToManyField(
+        'books.PublisherNote',
+        null=True,
+        blank=True,
+        related_name="book",
+        help_text='Free-text public publisher notes regarding this book',
     )
 
     def __str__(self):
@@ -367,7 +384,7 @@ class Chapter(models.Model):
         max_length=255,
     )
     description = models.TextField()
-    pages = models.PositiveIntegerField()
+    pages = models.PositiveIntegerField(blank=True, null=True)
     doi = models.CharField(
         max_length=200,
         blank=True,
@@ -375,10 +392,19 @@ class Chapter(models.Model):
         verbose_name='DOI',
         help_text='10.xxx/1234',
     )
-    number = models.PositiveIntegerField(
+    number = models.CharField(
         blank=True,
         null=True,
-        help_text='The chapter number eg. 1',
+        max_length=64,
+        help_text='The chapter number eg. 7 or VII',
+    )
+    date_embargo = models.DateField(
+        blank=True,
+        null=True,
+    )
+    date_published = models.DateField(
+        blank=True,
+        null=True,
     )
     sequence = models.PositiveIntegerField(
         help_text='The order in which the chapters should appear.',
@@ -397,6 +423,18 @@ class Chapter(models.Model):
         help_text="Add copyright and/or license information here. "
                   "If left blank will display book version of this field.",
     )
+    keywords = M2MOrderedThroughField(
+        'submission.Keyword',
+        blank=True, null=True, through='books.KeywordChapter',
+    )
+    publisher_notes = models.ManyToManyField(
+        'books.PublisherNote',
+        null=True,
+        blank=True,
+        related_name="chapter",
+        help_text='Free-text public publisher notes regarding this book',
+    )
+
 
     class Meta:
         ordering = ('sequence', 'number',)
@@ -445,3 +483,39 @@ class Chapter(models.Model):
                     country=country,
                     identifier=identifier,
                 )
+
+
+class KeywordBook(models.Model):
+    keyword = models.ForeignKey("submission.Keyword")
+    book = models.ForeignKey("books.Book")
+    order = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = ('keyword', 'book')
+
+    def __str__(self):
+        return self.keyword.word
+
+    def __repr__(self):
+        return "KeywordBook(%s, %d)" % (self.keyword.word, self.book.id)
+
+
+class KeywordChapter(models.Model):
+    keyword = models.ForeignKey("submission.Keyword")
+    chapter = models.ForeignKey("books.Chapter")
+    order = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = ('keyword', 'chapter')
+
+    def __str__(self):
+        return self.keyword.word
+
+    def __repr__(self):
+        return "KeywordChapter(%s, %d)" % (self.keyword.word, self.chapter.id)
+
+
+class PublisherNote(models.Model):
+    note = models.TextField(blank=True, null=True)
