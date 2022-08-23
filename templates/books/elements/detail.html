@@ -33,6 +33,12 @@
                     <td colspan="100">{{ book.license_information }}</td>
                 </tr>
                 {% endif %}
+                <tr>
+                    <th colspan="100">Citation</th>
+                </tr>
+                <tr>
+                    <td colspan="100">{{ book.citation|safe }}</td>
+                </tr>
             </table>
         </div>
     </li>
