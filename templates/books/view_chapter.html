@@ -43,14 +43,19 @@
                                     <tr>
                                         <th>Published</th>
                                         <th>Published By</th>
+                                      {% if chapter.pages %}
                                         <th>Pages</th>
-                                        {% if chapter.doi %}
-                                            <th>DOI</th>{% endif %}
+                                      {% endif %}
+                                      {% if chapter.doi %}
+                                        <th>DOI</th>
+                                      {% endif %}
                                     </tr>
                                     <tr>
                                         <td>{{ book.date_published }}</td>
                                         <td>{{ book.publisher_name }}</td>
+                                        {% if chapter.pages %}
                                         <td>{{ chapter.pages }}</td>
+                                        {% endif %}
                                         {% if chapter.doi %}
                                             <td>{{ chapter.doi }}</td>{% endif %}
                                     </tr>
@@ -62,9 +67,30 @@
                                             <td colspan="100">{% if chapter.license_information %}{{ chapter.license_information }}{% else %}Book License Information: {{ book.license_information }}{% endif %}</td>
                                         </tr>
                                         {% endif %}
+                                        <tr>
+                                            <th colspan="100">Citation</th>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="100">{{ chapter.citation|safe }}</td>
+                                        </tr>
                                 </table>
                             </div>
                         </li>
+                        {% if chapter.publisher_notes.exists %}
+                        <li class="accordion-item" data-accordion-item>
+                            <a href="#" class="accordion-title">Publisher Notes</a>
+                            <div class="accordion-content" data-tab-content>
+                                <p>
+                                    <em>{{ chapter.title }}</em> has the following notes:
+                                <ul>
+                                    {% for note in chapter.publisher_notes.all %}
+                                        <li> {{ note.note|safe }} </li>
+                                    {% endfor %}
+                                </ul>
+                                </p>
+                            </div>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
                 <div class="large-2 columns">
