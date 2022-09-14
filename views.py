@@ -27,7 +27,7 @@ def index(request, category_slug=None):
         )
         books = books.filter(category=category)
 
-    template = 'books/index.html'
+    template = 'books/{}/index.html'.format(request.press.theme)
     context = {
         'books': books,
         'category': category,
@@ -44,7 +44,7 @@ def view_book(request, book_id):
         date_published__isnull=False,
     )
 
-    template = 'books/book.html'
+    template = 'books/{}/book.html'.format(request.press.theme)
     context = {
         'book': book,
     }

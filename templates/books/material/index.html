@@ -1,0 +1,30 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if not category %}Published Books{% else %}{{ category.name }}{% endif %}{% endblock %}
+
+{% block body %}
+    <section class="content">
+        <div class="row">
+            {% if not category %}
+                <h4>{{ book_settings.book_page_title }}</h4>
+            {% else %}
+                {% if category.display_title %}
+                <h4>Category: {{ category.name }}</h4>
+                {% endif %}
+                {{ category.description|safe }}
+                <a href="{% url 'books_index' %}" class="button">< Back to All</a>
+            {% endif %}
+
+            {% for book in books %}
+                <div class="box journal">
+                        {% include "books/material/book_detail.html" with book=book %}
+                    </div>
+                <hr />
+            {% empty %}
+                <p>There are no published books to display.</p>
+            {% endfor %}
+        </div>
+
+    </section>
+
+{% endblock body %}

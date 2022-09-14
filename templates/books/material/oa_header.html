@@ -1,0 +1,15 @@
+<div class="row">
+    <div class="col l10">
+        <h2>{% if books %}
+            <a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}
+            {% if books %}</a>{% endif %}</h2>
+        <h6><em>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
+            {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
+    </div>
+    <div class="col l2">
+        {% if book.is_open_access %}
+            <img src="/media/books/oa.png" alt="Open Access Logo"
+                 style="max-width: 100%;">
+        {% endif %}
+    </div>
+</div>

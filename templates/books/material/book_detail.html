@@ -1,0 +1,73 @@
+{% load static from staticfiles %}
+{% load i18n %}
+<div class="l12 col">
+    <div class="content clearfix">
+        <div class="col l3">
+            <img style="max-width: 100%;" class="materialboxed" src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="{{ book.title }} book cover">
+
+            {% if not books %}<p><br /><a class="waves-effect waves-light btn" href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
+        </div>
+        <div class="{% if books %}col l9{% else %}col l7{% endif %}{% if not books and not book.format_set.exists %} end{% endif %}">
+            {% if book.is_open_access %}
+                {% include "books/material/oa_header.html" %}
+            {% else %}
+                <h2>{% if books %}<a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}{% if books %}</a>{% endif %}</h2>
+                <h6><em>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
+                {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
+            {% endif %}
+
+            {% if book.remote_url and book.remote_book_label %}
+            <a href="{{ book.remote_url }}" class="waves-effect waves-light btn">{{ book.remote_book_label }} <span class="fa fa-external-link" aria-hidden="true"></span></a>
+            {% endif %}
+            {% for format in book.format_set.all %}
+                <a href="{% url 'books_download_format' book.pk format.pk %}" class="waves-effect waves-light btn"><i class="fa fa-download">&nbsp;</i> Download {{ format.title }}</a>
+                {% if format.is_epub %}<a href="{% url 'books_read_epub' book.pk format.pk %}" target="_blank" class="waves-effect waves-light btn"><i class="fa fa-book">&nbsp;</i> Read this Book</a>{% endif %}
+            {% endfor %}
+
+            {% if book.purchase_url %}
+                <a href="{{ book.purchase_url }}" class="waves-effect waves-light btn" target="_blank">
+                    {% if book.category %}{{ book.category.buy_button_text }}{% else %}Buy this Book{% endif %}
+                    <span class="fa fa-external-link" aria-hidden="true"></span>
+                </a>
+            {% endif %}
+            {% if book.category %}
+                <h3>Category</h3>
+                <p><a href="{% url 'books_index_category' book.category.slug %}">{{ book.category.name }}</a></p>
+            {% endif %}
+            <h3>Description</h3>
+            {{ book.description|safe }}
+            {% if books %}
+                <p>
+                    <a href="{% url 'books_book' book.pk %}">View more detail <i class="fa fa-arrow-right"></i></a>
+                </p>
+            {% endif %}
+
+            {% with chapters=book.chapter_set.all %}
+                {% if not books %}
+                    {% include "books/material/detail.html" %}
+                {% endif %}
+            {% endwith %}
+
+        </div>
+
+        {% if not books and book.format_set.exists %}
+            <div class="large-2 columns">
+                <h3>Book Metrics</h3>
+                <h4>{{ book.metrics.downloads }}</h4>
+                <p>Downloads</p>
+                {% if book.metrics.views %}
+                <h4>{{ book.metrics.views }}</h4>
+                <p>EPUB Views</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block css %}
+<style>
+    th {
+        padding: 15px 5px !important;
+    }
+</style>
+{% endblock css %}
