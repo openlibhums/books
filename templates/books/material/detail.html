@@ -1,0 +1,57 @@
+<h3>Details</h3>
+<table class="striped">
+    <tr>
+        <th>Published</th>
+        <th>Published By</th>
+        <th>Pages</th>
+        {% if book.isbn %}
+            <th>ISBN</th>{% endif %}
+        {% if book.doi %}
+            <th>DOI</th>{% endif %}
+        {% if chapters %}
+            <th>{% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}
+                Chapters{% endif %}</th>{% endif %}
+    </tr>
+    <tr>
+        <td>{{ book.date_published }}</td>
+        <td>{{ book.publisher_name }}</td>
+        <td>{{ book.pages }}</td>
+        {% if book.isbn %}
+            <td>{{ book.isbn }}</td>{% endif %}
+        {% if book.doi %}
+            <td>{{ book.doi }}</td>{% endif %}
+        {% if chapters %}
+            <td>{{ chapters.count }}</td>{% endif %}
+    </tr>
+    {% if book.license_information %}
+        <tr>
+            <th colspan="100">License Information</th>
+        </tr>
+        <tr>
+            <td colspan="100">{{ book.license_information }}</td>
+        </tr>
+    {% endif %}
+    {% if chapters %}
+        <tr>
+            <th colspan="100">
+                {% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}Chapters{% endif %}</th>
+        </tr>
+        <tr>
+            <td colspan="100">
+                <p>
+                    {{ book.full_title }} has the following
+                    {% if book.category %}{{ book.category.chapter_name_plural }}{% else %}
+                        Chapters{% endif %}
+                </p>
+                <ul>
+                    {% for chapter in chapters %}
+                        <li><a href="{% url 'book_view_chapter' book.pk chapter.pk %}">
+                            {% if chapter.number %}
+                                {{ chapter.number }}{% endif %} {{ chapter.title }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+    {% endif %}
+</table>
