@@ -224,7 +224,10 @@ class Book(models.Model):
 
 
 class Contributor(models.Model):
-    book = models.ForeignKey(Book)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+    )
     first_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100)
@@ -254,7 +257,10 @@ class Contributor(models.Model):
 
 
 class Format(models.Model):
-    book = models.ForeignKey(Book)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+    )
 
     title = models.CharField(max_length=100)
     filename = models.CharField(max_length=100)
@@ -318,12 +324,30 @@ def access_choices():
 
 
 class BookAccess(models.Model):
-    book = models.ForeignKey(Book)
-    chapter = models.ForeignKey('Chapter', blank=True, null=True)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+    )
+    chapter = models.ForeignKey(
+        'Chapter',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     type = models.CharField(max_length=20, choices=access_choices())
-    format = models.ForeignKey(Format, blank=True, null=True)
+    format = models.ForeignKey(
+        Format,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     accessed = models.DateTimeField(default=timezone.now)
-    country = models.ForeignKey('core.Country', null=True, blank=True)
+    country = models.ForeignKey(
+        'core.Country',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
     identifier = models.CharField(max_length=100)
 
     def __str__(self):
@@ -335,7 +359,10 @@ class BookAccess(models.Model):
 
 
 class Chapter(models.Model):
-    book = models.ForeignKey(Book)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+    )
     title = models.CharField(
         max_length=255,
     )

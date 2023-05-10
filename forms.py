@@ -27,7 +27,7 @@ class TableMultiSelect(SelectMultiple):
         pks = [row.get('object', None).pk for row in self.items if row.get('object', None)]
         return models.Contributor.objects.filter(pk__in=pks)
 
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, choices=(), renderer=None):
         value_for_template = [int(val) for val in value] if value else None
         context = {
             'items': self.items,
@@ -95,6 +95,7 @@ class ChapterForm(forms.ModelForm):
         items = kwargs.pop('items', None)
         super(ChapterForm, self).__init__(*args, **kwargs)
         self.fields['contributors'].widget = TableMultiSelect(items=items)
+        self.fields['contributors'].required = False
 
     file = forms.FileField(required=False)
 
