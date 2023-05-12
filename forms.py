@@ -44,7 +44,7 @@ class BookForm(forms.ModelForm):
 
     class Meta:
         model = models.Book
-        exclude = ('',)
+        exclude = ('keywords', 'publisher_notes')
         widgets = {
             'description': SummernoteWidget(),
             'date_published': DateInput(),

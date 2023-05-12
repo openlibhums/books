@@ -24,6 +24,7 @@ def install():
 
 
 def hook_registry():
-    # On site load, the load function is run for each installed plugin to generate
-    # a list of hooks.
-    pass
+    return {
+        'press_admin_nav_block': {'module': 'plugins.books.hooks', 'function': 'nav_hook'}
+    }
+
