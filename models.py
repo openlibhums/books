@@ -535,7 +535,10 @@ class KeywordBook(models.Model):
         "submission.Keyword",
         on_delete=models.CASCADE,
     )
-    book = models.ForeignKey("books.Book")
+    book = models.ForeignKey(
+        "books.Book",
+        on_delete=models.CASCADE,
+    )
     order = models.PositiveIntegerField(default=1)
 
     class Meta:
