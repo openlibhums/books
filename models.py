@@ -531,7 +531,10 @@ class Chapter(models.Model):
 
 
 class KeywordBook(models.Model):
-    keyword = models.ForeignKey("submission.Keyword")
+    keyword = models.ForeignKey(
+        "submission.Keyword",
+        on_delete=models.CASCADE,
+    )
     book = models.ForeignKey("books.Book")
     order = models.PositiveIntegerField(default=1)
 
@@ -547,8 +550,14 @@ class KeywordBook(models.Model):
 
 
 class KeywordChapter(models.Model):
-    keyword = models.ForeignKey("submission.Keyword")
-    chapter = models.ForeignKey("books.Chapter")
+    keyword = models.ForeignKey(
+        "submission.Keyword",
+        on_delete=models.CASCADE,
+    )
+    chapter = models.ForeignKey(
+        "books.Chapter",
+        on_delete=models.CASCADE,
+    )
     order = models.PositiveIntegerField(default=1)
 
     class Meta:
