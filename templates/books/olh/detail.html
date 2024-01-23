@@ -34,7 +34,7 @@
                     <th colspan="100">License Information</th>
                 </tr>
                 <tr>
-                    <td colspan="100">{{ book.license_information }}</td>
+                    <td colspan="100">{{ book.license_information|safe }}</td>
                 </tr>
                 {% endif %}
                 <tr>
