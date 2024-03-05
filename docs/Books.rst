@@ -70,7 +70,7 @@ Adding a new book
 -------------------
 New monographs are added through the ‘Add new book’ option, which is positioned rightmost in the topbar of the main dashboard. 
 
-.. figure:: nstatic/books_addbook_dash.png
+.. figure:: nstatic/books_addbook_dashboard.png
     :alt: The ‘Add a new book’ page. On the left, the book details can be filled into various text boxes. On the right are sections for ‘Contributors’, ‘Formats’ and ‘Chapters’. These are currently blocked, which is indicated for each of them with a red bar and the text “Save book before adding contributors/formats/chapters”.
 
 Before the manuscript files can be uploaded, various metadata fields need to be completed first, displayed on the left-hand side of the page under ‘Book details’.
@@ -144,7 +144,7 @@ Formats
 
 This is where manuscript files are uploaded. Various file types can be used, such as PDF, ePub and Mobi.
 
-.. figure:: nstatic/books_.png
+.. figure:: nstatic/books_add_format.png
     :alt: The page where manuscript files can be uploaded. Fields are described in the text below this image.
 
 This page contains the following fields:
@@ -156,12 +156,12 @@ This page contains the following fields:
 
 When an .ePub is uploaded, Janeway will generate a ‘Read this book’ option on the book page. This allows users to read the book using an online reader, without requiring a download. This can be disabled on request.
 
-.. figure:: nstatic/books_.png
+.. figure:: nstatic/books_web_buttons.png
     :alt: The download, read, and buy buttons as they appear to users on the press website.
 
 Make sure that the filename of the file uploaded is consistent and correct. Whilst Janeway will change the filename to the title internally, depending on the application used to open the document after download, the original filename might still be visible. Google Chrome is an example of an application that might still display the original filename in its reader toolbar, as displayed in the image below.
 
-.. figure:: nstatic/books_.png
+.. figure:: nstatic/books_final_manuscript.png
     :alt: " "
 
 .. note:: ‘Read this book’ will always follow the ePub download option and ‘Buy this book’ will always be the last one in the sequence.
@@ -169,7 +169,7 @@ Make sure that the filename of the file uploaded is consistent and correct. Whil
 Chapters
 ~~~~~~~~~~
 
-.. figure:: nstatic/books_.png
+.. figure:: nstatic/books_add_chapter.png
     :alt: Chapter dashboard with various fields for entering metadata.
 
 If uploading individual chapters, this is where they are uploaded and the metadata is entered. This might be of particular interest if the book is an edited volume with multiple contributors; individual chapter uploads with their respective metadata allow for higher discoverability. 
@@ -260,7 +260,7 @@ Reporting metrics for books
 ----------------------------
 Reporting for books does not run through the reporting plug-in, instead it is done separately through the books plug-in.
 
-.. figure:: nstatic/books_.png
+.. figure:: nstatic/books_metrics_dashboard.png
     :alt: The Book metrics page.
 
 On this page, you can view the general access metrics for monographs, as well as for each format of a monograph. On this page, date ranges can be selected per day, rather than per month as in the ‘Metrics by month’ page. The date range affects both the Book Metrics field and the Format Metrics field.
@@ -271,14 +271,14 @@ Books metrics
 ~~~~~~~~~~~~~~~
 The first section of this dashboard displays the total views and downloads (each in their respective column) per book. The columns can be sorted by ID, Title, Subtitle, First Author name, Date published, Reads and Downloads.
 
-.. figure:: nstatic/books_monthlymetrics_dashboard.png
+.. figure:: nstatic/books_metrics.png
     :alt: " "
 
 Format Metrics
 ~~~~~~~~~~~~~~~~~
 This section sorts the data by format, providing insights into how specific formats are performing. This section can be sorted by Format, Title, Views and Downloads.
 
-.. figure:: nstatic/books_.png
+.. figure:: nstatic/books_format_metrics.png
     :alt: " "
 
 .. note:: The total views and downloads in this report may differ slightly from the amounts listed in the monthly report discussed above. This is due to an issue with time zones and the cutoff points used for the calculation.
