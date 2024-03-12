@@ -34,5 +34,5 @@ published through this plug-in and the following information for all of them
 > [!NOTE]
 > Here’s an example of a note that is styled with a special “i” and a blue bar.
 
-> [!NOTE]
-> Here’s an example of a tip that is styled with a lightbulb and a green bar.
+> [!TIP]
+> Here’s an example of a tip that is styled with a lightbulb and a green bar. See [Alerts](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#alerts)
