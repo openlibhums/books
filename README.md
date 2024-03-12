@@ -1,7 +1,13 @@
-# books
-This plugin allows for the publication of Books within the Janeway ecosystem.
+# Janeway Books
+This plugin allows for the publication of books within the Janeway ecosystem.
 
-This is not a comprehensive platform for the production of books and if you are interested in that you should investigate the likes of RUA, Editoria or OMP.
+## User Guide
+We have written a [user guide](docs/USER_GUIDE.md) here on GitHub.
 
-To install: clone or download into plugins/ folder and then run the install_plugins command.
+## Disclaimer
+This is not a comprehensive platform for the production of books. If you are
+interested in that, you should investigate the likes of RUA, Editoria or OMP.
 
+## Installation
+To install: clone or download into the `plugins` folder and then run the
+`install_plugins` command.
