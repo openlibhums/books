@@ -6,10 +6,10 @@ from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import Http404
+from django.db.models import Q
 
 from plugins.books import models, forms, files, logic
 from core import files as core_files
-from utils import setting_handler
 
 
 def index(request, category_slug=None):
@@ -26,6 +26,12 @@ def index(request, category_slug=None):
             slug=category_slug,
         )
         books = books.filter(category=category)
+
+    search = request.GET.get('search')
+    if search:
+        books = books.filter(
+            (Q(title__icontains=search) | Q(description__icontains=search))
+        )
 
     template = 'books/{}/index.html'.format(request.press.theme)
     context = {
