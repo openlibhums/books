@@ -101,7 +101,7 @@ class ChapterForm(forms.ModelForm):
 
     class Meta:
         model = models.Chapter
-        exclude = ('book', 'filename')
+        exclude = ('book', 'filename', 'keywords', 'publisher_notes')
 
     def save(self, commit=True, book=None, *args, **kwargs):
         save_chapter = super(ChapterForm, self).save(commit=False)
