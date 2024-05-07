@@ -366,20 +366,21 @@ def books_chapter(request, book_id, chapter_id=None):
             instance=chapter,
             items=logic.get_chapter_contributor_items(book),
         )
-        form.save(book=book)
-        form.save_m2m()
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            'Chapter Saved.',
-        )
-
-        return redirect(
-            reverse(
-                'books_edit_book',
-                kwargs={'book_id': book.pk},
+        if form.is_valid():
+            form.save(book=book)
+            form.save_m2m()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Chapter Saved.',
             )
-        )
+
+            return redirect(
+                reverse(
+                    'books_edit_book',
+                    kwargs={'book_id': book.pk},
+                )
+            )
 
     template = 'books/chapter.html'
     context = {
