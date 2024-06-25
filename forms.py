@@ -48,6 +48,7 @@ class BookForm(forms.ModelForm):
         widgets = {
             'description': SummernoteWidget(),
             'date_published': DateInput(),
+            'date_embargo': DateInput(),
         }
 
 
