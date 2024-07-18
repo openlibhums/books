@@ -212,7 +212,7 @@ This page contains the following fields:
 ### Formats
 
 This is where manuscript files are uploaded. Various file types can be
-used, such as PDF, ePub and Mobi.
+used, such as PDF, EPUB and Mobi.
 
 ![The page where manuscript files can be uploaded. Fields are described in the text below this image.](images/books_add_format.png)
 
@@ -309,8 +309,7 @@ You can import the metadata for multiple monographs into Janeway at once
 using the ‘import books’ option. This is commonly used for migrations.
 
 Metadata can be imported using a .csv file encoded in UTF-8 [^1] with
-certain headers. There is an example import here, with pre-prepared
-headers: books plugin example import \[hyperlink to file\].
+certain headers. An example import with pre-prepared headers is coming soon.
 
 These headers are:
 
