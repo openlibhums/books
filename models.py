@@ -165,18 +165,21 @@ class Book(models.Model):
 
     def contributors_citation(self):
         contributors = self.contributor_set.all()
+        contributors_count = contributors.count()
 
-        if contributors.count() == 1:
+        if contributors_count == 1:
             return '{contributor} '.format(
                 contributor=contributors[0].citation_name()
             )
-        elif contributors.count() == 2:
+        elif contributors_count == 2:
             return '{contributor_one} & {contributor_two} '.format(
                 contributor_one=contributors[0].citation_name(),
                 contributor_two=contributors[1].citation_name(),
             )
-        else:
+        elif contributors_count > 3:
             return '{contributor} et al. '.format(contributor=contributors[0])
+        else:
+            return ''  # No contributors.
 
     def full_title(self):
         if self.prefix and self.subtitle:
