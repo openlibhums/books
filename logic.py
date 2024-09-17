@@ -1,8 +1,13 @@
-from plugins.books import models
+import os
+import csv
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.utils import timezone
+from django.conf import settings
+
+from plugins.books import models
+from core import files
 
 
 def get_first_day(dt, d_years=0, d_months=0):
@@ -169,3 +174,24 @@ def get_chapter_contributor_items(book):
     return items
 
 
+def export_metrics_by_month(dates, data):
+    """
+    Serves a CSV of metrics by month.
+    """
+    filename = '{0}.csv'.format(timezone.now())
+    full_path = os.path.join(settings.BASE_DIR, 'files', 'temp', filename)
+    with open(full_path, 'w', encoding='utf-8') as csvfile:
+        csv_writer = csv.writer(csvfile, delimiter=',')
+        csv_writer.writerow(
+            ['Book', 'Book ID'] + dates,
+
+        )
+        for item in data:
+            row = [item.get('book').title, item.get('book').pk] + item.get('date_metrics')
+            print(row)
+            csv_writer.writerow(row)
+
+    return files.serve_temp_file(
+        full_path,
+        filename
+    )
