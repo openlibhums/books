@@ -1,30 +1,41 @@
 {% extends "core/base.html" %}
+{% load static %}
 
-{% block title %}{% if not category %}Published Books{% else %}{{ category.name }}{% endif %}{% endblock %}
+{% block title %}{% if not category %}Published Books{% else %}
+  {{ category.name }}{% endif %}{% endblock %}
+
+{% block css %}
+  <link href="{% static "books/books.css" %}" rel="stylesheet">
+{% endblock css %}
 
 {% block body %}
-    <section class="content">
-        <div class="row">
-            {% if not category %}
-                <h4>{{ book_settings.book_page_title }}</h4>
-            {% else %}
-                {% if category.display_title %}
-                <h4>Category: {{ category.name }}</h4>
-                {% endif %}
-                {{ category.description|safe }}
-                <a href="{% url 'books_index' %}" class="button">< Back to All</a>
-            {% endif %}
+  <section class="content">
 
-            {% for book in books %}
-                <div class="box journal">
-                        {% include "books/OLH/book_detail.html" with book=book %}
-                    </div>
-                <hr />
-            {% empty %}
-                <p>There are no published books to display.</p>
-            {% endfor %}
+    <div class="row">
+      {% include "books/olh/breadcrumb.html" %}
+      {% if not category %}
+        <h1>{{ book_settings.book_page_title }}</h1>
+      {% else %}
+        {% if category.display_title %}
+          <h1>Category: {{ category.name }}</h1>
+        {% endif %}
+        {{ category.description|safe }}
+        <a href="{% url 'books_index' %}" class="button">< Back to All</a>
+      {% endif %}
+
+      {% for book in books %}
+        <div class="olh-book">
+          {% include "books/OLH/book_detail.html" with book=book index=True %}
         </div>
+        {% empty %}
+        <p>There are no published books to display.</p>
+      {% endfor %}
+    </div>
 
-    </section>
+  </section>
 
 {% endblock body %}
+
+{% block js %}
+  {% include "books/olh/read_more.js" %}
+{% endblock %}

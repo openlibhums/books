@@ -1,78 +1,88 @@
 {% load static %}
-{% load i18n %}
-<div class="large-12 columns">
-    <div class="content clearfix">
-        <div class="large-3 columns">
-            <img src="{% if book.cover %}{{ book.cover.url }}{% endif %}" alt="">
 
-            {% if not books %}<p><br /><a class="button" href="{% url 'books_index' %}"><i class="fa fa-arrow-left">&nbsp;</i>Back to Listing</a></p>{% endif %}
-        </div>
-        <div class="{% if books %}large-9 columns{% else %}large-7 columns{% endif %}{% if not books and not book.format_set.exists %} end{% endif %}">
-            {% if book.is_open_access %}
-                {% include "books/oa_header.html" %}
-            {% else %}
-                <h2>{% if books %}<a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}{% if books %}</a>{% endif %}</h2>
-            {% endif %}
-
-            <h6><em>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
-            {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
-
-            {% if book.remote_url and book.remote_book_label %}
-            <a href="{{ book.remote_url }}" class="button">{{ book.remote_book_label }} <span class="fa fa-external-link" aria-hidden="true"></span></a>
-            {% endif %}
-            {% for format in book.format_set.all %}
-                <a href="{% url 'books_download_format' book.pk format.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download {{ format.title }}</a>
-                {% if format.is_epub %}<a href="{% url 'books_read_epub' book.pk format.pk %}" target="_blank" class="button"><i class="fa fa-book">&nbsp;</i> Read this Book</a>{% endif %}
-            {% endfor %}
-
-            {% if book.purchase_url %}
-                <a href="{{ book.purchase_url }}" class="button" target="_blank">
-                    {% if book.category %}{{ book.category.buy_button_text }}{% else %}Buy this Book{% endif %}
-                    <span class="fa fa-external-link" aria-hidden="true"></span>
-                </a>
-            {% endif %}
-            <table class="table" style="margin-bottom: 0;">
-                {% if book.category %}
-                <tr>
-                    <th>Category</th>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'books_index_category' book.category.slug %}">{{ book.category.name }}</a></td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <th>Description</th>
-                </tr>
-                <tr>
-                    <td>
-                        {{ book.description|safe }}
-                        {% if books %}
-                        <p>
-                            <a href="{% url 'books_book' book.pk %}">View more detail <i class="fa fa-arrow-right"></i></a>
-                        </p>
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
-
-            {% with chapters=book.chapter_set.all %}
-                {% if not books %}
-                    {% include "books/OLH/detail.html" %}
-                {% endif %}
-            {% endwith %}
-
-        </div>
-
-        {% if not books and book.format_set.exists %}
-            <div class="large-2 columns">
-                <h3>Book Metrics</h3>
-                <h4>{{ book.metrics.downloads }}</h4>
-                <p>Downloads</p>
-                {% if book.metrics.views %}
-                <h4>{{ book.metrics.views }}</h4>
-                <p>EPUB Views</p>
-                {% endif %}
-            </div>
+<div class="book">
+  <div class="row">
+    <div class="medium-4 large-3 columns">
+      <a href="{% url 'books_book' book.pk %}">
+        {% if book.cover %}
+          <img src="{{ book.cover.url }}" alt="{{ book.title }} book cover"
+               class="book-cover">
+        {% else %}
+          <img src="{% static 'images/default_cover.jpg' %}"
+               alt="Default book cover" class="book-cover">
         {% endif %}
+      </a>
     </div>
+    <div class="medium-8 large-9 columns book-info">
+      {% if book.category %}
+        <div class="category">{{ book.category.name }}</div>
+      {% endif %}
+      <h2 class="book-title">
+        <a href="{% url 'books_book' book.pk %}">
+          {{ book.full_title }}
+        </a>
+      </h2>
+      <p class="authors">
+        {% for contributor in book.contributor_set.all %}
+          {{ contributor }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      <div class="button-group">
+        {% for format in book.format_set.all %}
+          <a href="{% url 'books_download_format' book.pk format.pk %}"
+             class="button read-button">
+            <i class="fa fa-download"></i>&nbsp;
+            Download {{ format.title }}
+          </a>
+          {% if format.is_epub %}
+            <a href="{% url 'books_read_epub' book.pk format.pk %}"
+               target="_blank" class="button read-button">
+              <i class="fa fa-book"></i> Read this Book
+            </a>
+          {% endif %}
+        {% endfor %}
+        {% if book.remote_url %}
+          <a href="{{ book.remote_url }}"
+             class="button read-button">
+            {{ book.remote_book_label }}
+            <i class="fi-arrow-right"></i>
+          </a>
+        {% endif %}
+        {% if book.purchase_url %}
+          <a href="{{ book.purchase_url }}" class="button read-button"
+             target="_blank">
+            {% if book.category %}{{ book.category.buy_button_text }}{% else %}
+              Buy this Book{% endif %}
+            &nbsp;<span class="fa fa-external-link" aria-hidden="true"></span>
+          </a>
+        {% endif %}
+      </div>
+      {% if book.keyword_set.exists %}
+        <div class="keyword-container">
+          <h3 class="section-title">Keywords</h3>
+          <p>{% for keyword in book.keyword_set.all %}
+            {{ keyword.word }}{% endfor %}</p>
+        </div>
+      {% endif %}
+      <div class="description-container">
+        <h3 class="section-title">Description</h3>
+        <div class="description-content" id="description-content">
+          {{ book.description|safe }}
+        </div>
+        <a href="#" class="toggle-description" id="toggle-description">Read
+          more</a>
+      </div>
+      {% if index %}
+        <a class="button read-button" href="{% url "books_book" book.pk %}">
+          View detail&nbsp;<span class="fa fa-arrow-circle-right">&nbsp;</span>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not books %}
+    {% include "books/OLH/detail.html" %}
+  {% endif %}
+
 </div>
+

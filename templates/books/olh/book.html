@@ -1,15 +1,23 @@
 {% extends "core/base.html" %}
+{% load static %}
 
 {% block title %}{{ book.title }}{% endblock %}
 
+{% block css %}
+  <link href="{% static "books/books.css" %}" rel="stylesheet">
+{% endblock css %}
+
 {% block body %}
-    <section class="content">
-        <div class="row">
-            <div class="box journal">
-                <div class="row">
-                    {% include "books/OLH/book_detail.html" with book=book %}
-                </div>
-            </div>
-        </div>
-    </section>
+  <section class="content">
+    <div class="row">
+      {% include "books/olh/breadcrumb.html" %}
+      <div class="olh-book">
+        {% include "books/OLH/book_detail.html" with book=book %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block js %}
+  {% include "books/olh/read_more.js" %}
 {% endblock %}

@@ -1,0 +1,2 @@
+Faker==18.9.0
+svgwrite==1.4.1

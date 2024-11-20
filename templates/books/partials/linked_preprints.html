@@ -1,0 +1,44 @@
+<ul class="list-group" id="linked-preprints">
+  {% csrf_token %}
+  {% for book_preprint in linked_preprints %}
+  <li class="list-group-item" data-preprint-id="{{ book_preprint.id }}">
+    <div class="preprint-item">
+      <span>[{{ book_preprint.order }}] {{ book_preprint.preprint.title }}</span>
+
+      <div class="button-group tiny float-right">
+        <!-- Up Button -->
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_preprint' book.pk book_preprint.id 'up' %}"
+          hx-target="#linked-preprints"
+          hx-swap="innerHTML"
+        >
+          Up
+        </button>
+
+        <!-- Down Button -->
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_preprint' book.pk book_preprint.id 'down' %}"
+          hx-target="#linked-preprints"
+          hx-swap="innerHTML"
+        >
+          Down
+        </button>
+
+        <!-- Remove Button -->
+        <button
+          class="button alert tiny"
+          hx-post="{% url 'books_remove_preprint' book.pk book_preprint.id %}"
+          hx-target="#linked-preprints"
+          hx-swap="innerHTML"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  </li>
+  {% empty %}
+  <li class="list-group-item">No preprints linked to this book.</li>
+  {% endfor %}
+</ul>

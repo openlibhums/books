@@ -1,5 +1,4 @@
-from django.core.urlresolvers import reverse
-from django.template.loader import render_to_string
+from django.urls import reverse
 
 from utils.function_cache import cache
 

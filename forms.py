@@ -6,6 +6,7 @@ from django.utils.text import slugify
 from django_summernote.widgets import SummernoteWidget
 
 from plugins.books import models, files
+from repository import models as repository_models
 
 
 class DateInput(forms.DateInput):
@@ -44,7 +45,7 @@ class BookForm(forms.ModelForm):
 
     class Meta:
         model = models.Book
-        exclude = ('keywords', 'publisher_notes')
+        exclude = ('keywords', 'publisher_notes', 'linked_repository_objects')
         widgets = {
             'description': SummernoteWidget(),
             'date_published': DateInput(),
@@ -165,3 +166,17 @@ class CategoryForm(forms.ModelForm):
             save_category.save()
 
         return save_category
+
+
+class PreprintSelectionForm(forms.Form):
+    preprint_id = forms.ModelChoiceField(
+        queryset=repository_models.Preprint.objects.none(),
+        label="Select a Preprint",
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        available_preprints = kwargs.pop('available_preprints', None)
+        super().__init__(*args, **kwargs)
+        if available_preprints is not None:
+            self.fields['preprint_id'].queryset = available_preprints

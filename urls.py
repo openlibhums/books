@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from plugins.books import views
+from plugins.books import views, partial_views
 
 urlpatterns = [
     re_path(r'^$', views.index, name='books_index'),
@@ -43,4 +43,21 @@ urlpatterns = [
 
     re_path(r'^onix/export/$', views.export_onix_xml, name='books_export_onix_xml'),
     re_path(r'^onix/export/(?P<book_id>\d+)/$', views.export_onix_xml, name='books_export_onix_xml_book'),
+    re_path(
+        r'^admin/(?P<book_id>\d+)/manage-preprints/$',
+        views.book_preprint_management_view,
+        name='book_preprint_management',
+    ),
+
+    # Partial URLs for HTMX
+    re_path(
+        r'^books/(?P<book_id>\d+)/preprint/(?P<book_preprint_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_preprint,
+        name='books_move_preprint',
+    ),
+    re_path(
+        r'^books/(?P<book_id>\d+)/preprint/(?P<book_preprint_id>\d+)/remove/$',
+        partial_views.remove_preprint,
+        name='books_remove_preprint',
+    ),
 ]

@@ -6,10 +6,11 @@ from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import Http404
+from django.db.models import Q
 
 from plugins.books import models, forms, files, logic
 from core import files as core_files
-from utils import setting_handler
+from repository import models as repository_models
 
 
 def index(request, category_slug=None):
@@ -47,6 +48,7 @@ def view_book(request, book_id):
     template = 'books/{}/book.html'.format(request.press.theme)
     context = {
         'book': book,
+        'book_settings': models.BookSetting.objects.first(),
     }
 
     return render(request, template, context)
@@ -267,19 +269,26 @@ def import_books_process(request, uuid):
         return redirect(reverse('books_import_preview', kwargs={'uuid': uuid}))
 
 
-@staff_member_required
-def export_onix_xml(request, book_id=None):
-    books = models.Book.objects.all()
+def export_onix_xml(
+    request,
+    book_id=None,
+):
+    # Get the books based on the optional book_id parameter
+    books = models.Book.objects.all() if book_id is None else models.Book.objects.filter(pk=book_id)
 
-    if book_id:
-        books = models.Book.objects.filter(pk=book_id)
-
+    # Use an ONIX-compliant XML template
     template = 'books/onix.xml'
     context = {
         'books': books,
+        'chapters': models.Chapter.objects.filter(book__in=books),
+        'contributors': models.Contributor.objects.filter(book__in=books),
     }
 
-    return render(request, template, context)
+    xml_content = render(request, template, context).content
+    return HttpResponse(
+        xml_content,
+        content_type='application/xml',
+    )
 
 
 @staff_member_required
@@ -463,7 +472,6 @@ def categories(request, category_id=None):
                 )
             )
 
-
     template = 'books/categories.html'
     context = {
         'categories': all_categories,
@@ -471,3 +479,68 @@ def categories(request, category_id=None):
     }
 
     return render(request, template, context)
+
+
+def book_preprint_management_view(
+    request,
+    book_id,
+):
+    """Manage linked preprints for a given book."""
+    book = get_object_or_404(
+        models.Book,
+        id=book_id,
+    )
+
+    # Fetch linked preprints through the BookPreprint model
+    linked_preprints = models.BookPreprint.objects.filter(
+        book=book,
+    ).order_by('order')
+
+    # Fetch available preprints that are not already linked
+    available_preprints = repository_models.Preprint.objects.exclude(
+        id__in=linked_preprints.values_list('preprint_id', flat=True),
+    )
+
+    # Initialize the form for adding a new preprint
+    form = forms.PreprintSelectionForm(
+        request.POST or None,
+        available_preprints=available_preprints,
+    )
+
+    if request.method == 'POST' and 'preprint_id' in request.POST:
+        # Handle linking a new preprint
+        if form.is_valid():
+            preprint = form.cleaned_data['preprint_id']
+
+            # Create a new BookPreprint entry with the next available order
+            max_order = models.BookPreprint.objects.filter(
+                book=book,
+            ).count()
+
+            models.BookPreprint.objects.create(
+                book=book,
+                preprint=preprint,
+                order=max_order,
+            )
+
+            messages.success(
+                request,
+                'Preprint linked to book.',
+            )
+            return redirect(
+                'book_preprint_management',
+                book_id=book.id,
+            )
+
+    context = {
+        'book': book,
+        'linked_preprints': linked_preprints,
+        'available_preprints': available_preprints,
+        'form': form,
+    }
+
+    return render(
+        request,
+        'books/book_preprint_manager.html',
+        context,
+    )

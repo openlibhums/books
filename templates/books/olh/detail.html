@@ -1,82 +1,86 @@
-<ul class="accordion" data-accordion data-allow-all-closed="true">
-    <li class="accordion-item" data-accordion-item>
-        <a href="#" class="accordion-title">Details</a>
-        <div class="accordion-content" data-tab-content>
-            <table class="table small">
-                <tr>
-                    <th>Published</th>
-                    <th>Published By</th>
-                  {% if book.pages %}
-                    <th>Pages</th>
-                  {% endif %}
-                  {% if book.isbn %}
-                    <th>ISBN</th>{% endif %}
-                  {% if book.doi %}
-                    <th>DOI</th>{% endif %}
-                  {% if chapters %}
-                    <th>{% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}Chapters{% endif %}</th>{% endif %}
-                </tr>
-                <tr>
-                    <td>{{ book.date_published }}</td>
-                    <td>{{ book.publisher_name }}</td>
-                    {% if book.pages %}
-                    <td>{{ book.pages }}</td>
-                    {% endif %}
-                    {% if book.isbn %}
-                        <td>{{ book.isbn }}</td>{% endif %}
-                    {% if book.doi %}
-                        <td>{{ book.doi }}</td>{% endif %}
-                    {% if chapters %}
-                        <td>{{ chapters.count }}</td>{% endif %}
-                </tr>
-                {% if book.license_information %}
-                <tr>
-                    <th colspan="100">License Information</th>
-                </tr>
-                <tr>
-                    <td colspan="100">{{ book.license_information }}</td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <th colspan="100">Citation</th>
-                </tr>
-                <tr>
-                    <td colspan="100">{{ book.citation|safe }}</td>
-                </tr>
-            </table>
-        </div>
-    </li>
-
-    {% if chapters %}
-    <li class="accordion-item" data-accordion-item>
-        <a href="#" class="accordion-title">{% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}Chapters{% endif %}</a>
-        <div class="accordion-content" data-tab-content>
-            <p>{{ book.full_title }} has the following {% if book.category %}{{ book.category.chapter_name_plural }}{% else %}Chapters{% endif %}:
-            <ul>
-                {% for chapter in chapters %}
-                    <li><a href="{% url 'book_view_chapter' book.pk chapter.pk %}">{% if chapter.number %}
-                        {{ chapter.number }}{% endif %} {{ chapter.title }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-            </p>
-        </div>
-    </li>
+  <div class="medium-4 large-3 columns">
+    <div class="section">
+      <h3 class="section-title">Publication Details</h3>
+      <p><span class="label-text">Published:</span>
+        {{ book.date_published|date:"F j, Y" }}</p>
+      <p><span class="label-text">Publisher:</span> {{ book.publisher_name }}
+      </p>
+      <p><span class="label-text">Location:</span> {{ book.publisher_loc }}</p>
+      {% if book.doi %}
+        <p><span class="label-text">DOI:</span> {{ book.doi }}</p>
+      {% endif %}
+      {% if book.isbn %}
+        <p><span class="label-text">ISBN:</span> {{ book.isbn }}</p>
+      {% endif %}
+      {% if book.license_information %}
+        <p><span
+                class="label-text">License Information:</span> {{ book.license_information|safe }}
+        </p>
+      {% endif %}
+      {% if book_settings.display_review_status %}
+      <p>
+        <span class="label-text">
+          Peer Reviewed:
+        </span> {% if book.peer_reviewed %}Yes{% else %}No{% endif %}
+      </p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="medium-8 large-9 columns">
+    {% if book.chapter_set.exists %}
+      <div class="section">
+        <h3 class="section-title">Chapters</h3>
+        <ul class="no-bullet chapter-list">
+          {% for chapter in book.chapter_set.all %}
+            <li class="chapter-item">
+              <a href="{% url 'book_view_chapter' book.id chapter.id %}">
+                {{ chapter.number }}. {{ chapter.title }}
+              </a>
+              {% if chapter.doi %}
+                <p><span class="label-text">DOI:</span> {{ chapter.doi }}</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     {% endif %}
+  </div>
+
+<div class="medium-8 large-9 columns">
+  {% if book.bookpreprint_set.exists %}
+    <div class="section">
+      <h3 class="section-title">Linked Preprints</h3>
+      <ul class="no-bullet preprint-list">
+        {% for book_preprint in book.bookpreprint_set.all %}
+          <li class="preprint-item">
+            <a href="">
+              {{ book_preprint.preprint.title }}
+            </a>
+            {% if book_preprint.preprint.doi %}
+              <p><span
+                      class="label-text">DOI:</span> {{ book_preprint.preprint.doi }}
+              </p>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</div>
+
+
+  <div class="medium-12 large-12 columns">
+    <div class="section">
+      <h3 class="section-title">Citation</h3>
+      <p>{{ book.citation|safe }}</p>
+    </div>
 
     {% if book.publisher_notes.exists %}
-    <li class="accordion-item" data-accordion-item>
-        <a href="#" class="accordion-title">Publisher Notes</a>
-        <div class="accordion-content" data-tab-content>
-            <p>
-                {{ book.full_title }} has the following notes
-              <ul>
-                {% for note in book.publisher_notes.all %}
-                    <li> {{ note.note |safe }} </li>
-                {% endfor %}
-              </ul>
-            </p>
-        </div>
-    </li>
+      <div class="section">
+        <h3 class="section-title">Publisher Notes</h3>
+        {% for note in book.publisher_notes.all %}
+          <p>{{ note.note|safe }}</p>
+        {% endfor %}
+      </div>
     {% endif %}
-</ul>
+  </div>
