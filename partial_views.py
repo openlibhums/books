@@ -1,13 +1,26 @@
 from django.shortcuts import render, get_object_or_404
 from plugins.books import models
+from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 
 from pprint import pprint
 
+
 @require_POST
+@staff_member_required
 def move_preprint(request, book_id, book_preprint_id, direction):
     book = get_object_or_404(models.Book, pk=book_id)
-    book_preprint = get_object_or_404(models.BookPreprint, id=book_preprint_id, book=book)
+    book_preprint = get_object_or_404(models.BookPreprint, id=book_preprint_id,
+                                      book=book)
+
+    linked_preprints = models.BookPreprint.objects.filter(book=book).order_by(
+        'order')
+    for index, preprint in enumerate(linked_preprints):
+        if preprint.order != index:
+            preprint.order = index
+            preprint.save()
+    book_preprint.refresh_from_db()
+
     current_order = book_preprint.order
 
     if direction == 'up':
@@ -35,7 +48,8 @@ def move_preprint(request, book_id, book_preprint_id, direction):
             book_preprint.save()
 
     # Fetch the updated list of linked preprints
-    linked_preprints = models.BookPreprint.objects.filter(book=book).order_by('order')
+    linked_preprints = models.BookPreprint.objects.filter(book=book).order_by(
+        'order')
     return render(
         request,
         'books/partials/linked_preprints.html',
@@ -44,8 +58,8 @@ def move_preprint(request, book_id, book_preprint_id, direction):
 
 
 @require_POST
+@staff_member_required
 def remove_preprint(request, book_id, book_preprint_id):
-    # Fetch the book and the BookPreprint instance
     book = get_object_or_404(models.Book, pk=book_id)
     book_preprint = get_object_or_404(
         models.BookPreprint,
@@ -53,10 +67,8 @@ def remove_preprint(request, book_id, book_preprint_id):
         book=book,
     )
 
-    # Remove the link between the book and the preprint
     book_preprint.delete()
 
-    # Fetch the updated list of linked preprints
     linked_preprints = models.BookPreprint.objects.filter(
         book=book
     ).order_by('order')

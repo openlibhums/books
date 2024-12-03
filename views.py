@@ -6,7 +6,6 @@ from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import Http404
-from django.db.models import Q
 
 from plugins.books import models, forms, files, logic
 from core import files as core_files
@@ -419,6 +418,7 @@ def view_chapter(request, book_id, chapter_id):
 
     return render(request, template, context)
 
+
 @staff_member_required
 def categories(request, category_id=None):
     """
@@ -481,6 +481,7 @@ def categories(request, category_id=None):
     return render(request, template, context)
 
 
+@staff_member_required
 def book_preprint_management_view(
     request,
     book_id,

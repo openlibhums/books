@@ -56,9 +56,9 @@
             <a href="">
               {{ book_preprint.preprint.title }}
             </a>
-            {% if book_preprint.preprint.doi %}
+            {% if book_preprint.preprint.preprint_doi %}
               <p><span
-                      class="label-text">DOI:</span> {{ book_preprint.preprint.doi }}
+                      class="label-text">DOI:</span> {{ book_preprint.preprint.preprint_doi }}
               </p>
             {% endif %}
           </li>
