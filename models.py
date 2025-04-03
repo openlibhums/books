@@ -178,18 +178,19 @@ class Book(models.Model):
 
     def contributors_citation(self):
         contributors = self.contributor_set.all()
-
-        if contributors.count() == 1:
-            return '{contributor} '.format(
-                contributor=contributors[0].citation_name()
-            )
-        elif contributors.count() == 2:
-            return '{contributor_one} & {contributor_two} '.format(
-                contributor_one=contributors[0].citation_name(),
-                contributor_two=contributors[1].citation_name(),
-            )
-        else:
-            return '{contributor} et al. '.format(contributor=contributors[0])
+        if contributors:
+            if contributors.count() == 1:
+                return '{contributor} '.format(
+                    contributor=contributors[0].citation_name()
+                )
+            elif contributors.count() == 2:
+                return '{contributor_one} & {contributor_two} '.format(
+                    contributor_one=contributors[0].citation_name(),
+                    contributor_two=contributors[1].citation_name(),
+                )
+            else:
+                return '{contributor} et al. '.format(contributor=contributors[0])
+        return ''
 
     def full_title(self):
         if self.prefix and self.subtitle:
@@ -536,17 +537,19 @@ class Chapter(models.Model):
     def contributors_citation(self):
         contributors = self.contributors.all()
 
-        if contributors.count() == 1:
-            return '{contributor} '.format(
-                contributor=contributors[0].citation_name()
-            )
-        elif contributors.count() == 2:
-            return '{contributor_one} & {contributor_two} '.format(
-                contributor_one=contributors[0].citation_name(),
-                contributor_two=contributors[1].citation_name(),
-            )
-        else:
-            return '{contributor} et al. '.format(contributor=contributors[0])
+        if contributors:
+            if contributors.count() == 1:
+                return '{contributor} '.format(
+                    contributor=contributors[0].citation_name()
+                )
+            elif contributors.count() == 2:
+                return '{contributor_one} & {contributor_two} '.format(
+                    contributor_one=contributors[0].citation_name(),
+                    contributor_two=contributors[1].citation_name(),
+                )
+            else:
+                return '{contributor} et al. '.format(contributor=contributors[0])
+        return ''
 
 
 class KeywordBook(models.Model):
