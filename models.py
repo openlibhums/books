@@ -8,11 +8,10 @@ from urllib.parse import urlparse
 from user_agents import parse as parse_ua_string
 
 from django.db import models
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from django.core.files.images import get_image_dimensions
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 from core import models as core_models
 from core.file_system import JanewayFileSystemStorage
@@ -20,6 +19,7 @@ from core.model_utils import M2MOrderedThroughField
 from metrics.logic import get_iso_country_code
 from utils.shared import get_ip_address
 from plugins.books import files
+from press import models as press_models
 
 
 fs = JanewayFileSystemStorage()
@@ -262,6 +262,19 @@ class Book(models.Model):
             return 'View on {}'.format(
                 urlparse(self.remote_url).netloc
             )
+
+    @property
+    def press(self):
+        press = press_models.Press.objects.all().first()
+        return press
+
+    def url(self):
+        # Cross Repo/Press URLs are not renderable so we need to
+        # generate this manually. Bad practice but it gets the job done.
+        return "//{press_domain}/plugins/books/{book_id}".format(
+            press_domain=self.press.domain,
+            book_id=self.pk,
+        )
 
 
 class BookPreprint(models.Model):

@@ -25,6 +25,8 @@ def install():
 
 def hook_registry():
     return {
-        'press_admin_nav_block': {'module': 'plugins.books.hooks', 'function': 'nav_hook'}
+        'press_admin_nav_block': {'module': 'plugins.books.hooks', 'function': 'nav_hook'},
+        'preprint_sidebar': {'module': 'plugins.books.hooks',
+                                  'function': 'linked_books'}
     }
 

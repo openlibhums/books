@@ -411,6 +411,8 @@ def view_chapter(request, book_id, chapter_id):
     chapter = get_object_or_404(models.Chapter, pk=chapter_id)
 
     template = 'books/view_chapter.html'
+    if request.press.theme == 'OLH':
+        template = 'books/OLH/view_chapter.html'
     context = {
         'book': book,
         'chapter': chapter,

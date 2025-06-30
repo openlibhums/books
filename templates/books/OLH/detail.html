@@ -49,7 +49,7 @@
 <div class="medium-8 large-9 columns">
   {% if book.bookpreprint_set.exists %}
     <div class="section">
-      <h3 class="section-title">Linked Preprints</h3>
+      <h3 class="section-title">Linked Items</h3>
       <ul class="no-bullet preprint-list">
         {% for book_preprint in book.bookpreprint_set.all %}
           <li class="preprint-item">
