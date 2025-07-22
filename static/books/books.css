@@ -120,8 +120,6 @@
 .preprint-list {
   display: flex;
   flex-wrap: wrap; /* Allow items to wrap within two columns */
-  max-height: 240px; /* Set the maximum height */
-  overflow-y: auto; /* Enable vertical scrolling */
   overflow-x: hidden; /* Prevent horizontal scrolling */
   list-style-type: none; /* Remove default list styling */
   padding: 0; /* Remove padding for clean alignment */

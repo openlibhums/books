@@ -38,7 +38,7 @@
               {% endif %}
 
               <h2 class="book-title">
-                {% if chapter.number %}[{{ chapter.number }}] {% endif %}{{ chapter.title }}
+                {% if chapter.number %}{{ chapter.number }}. {% endif %}{{ chapter.title }}
               </h2>
 
               {% if chapter.contributors.exists %}

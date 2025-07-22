@@ -161,6 +161,10 @@ class Book(models.Model):
         default=False,
         help_text='Mark if this book has been peer reviewed.',
     )
+    edition = models.CharField(
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return self.title
@@ -328,6 +332,10 @@ class Format(models.Model):
     title = models.CharField(max_length=100)
     filename = models.CharField(max_length=100)
     sequence = models.PositiveIntegerField(default=10)
+    display_read_link = models.BooleanField(
+        default=True,
+        help_text="For EPUB only, check if you want a Read this Book link",
+    )
 
     class Meta:
         ordering = ('sequence',)

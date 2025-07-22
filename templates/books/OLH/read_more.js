@@ -1,32 +1,44 @@
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     var toggleButtons = document.querySelectorAll('.toggle-description');
     var descriptionContents = document.querySelectorAll('.description-content');
 
-    toggleButtons.forEach(function(toggleButton, index) {
+    toggleButtons.forEach(function (toggleButton, index) {
         var descriptionContent = descriptionContents[index];
         var expanded = false;
-        var originalHeight = descriptionContent.scrollHeight + 'px';
 
-        // Set initial max-height for each description
+        // Apply initial styles
         descriptionContent.style.maxHeight = '90px';
         descriptionContent.style.overflow = 'hidden';
         descriptionContent.style.transition = 'max-height 0.5s ease-out';
 
-        // Hide the "Show More" link if content is less than or equal to 90px
-        if (descriptionContent.scrollHeight <= 90) {
-            toggleButton.style.display = 'none'; // Hide the button
-        }
+        // Defer height measurement to allow fonts/images/layout to load
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                var fullHeight = descriptionContent.scrollHeight;
 
-        toggleButton.addEventListener('click', function(e) {
+                // Store the full height in a data attribute
+                descriptionContent.dataset.fullHeight = fullHeight + 'px';
+
+                // Hide the toggle button if content is short
+                if (fullHeight <= 90) {
+                    toggleButton.style.display = 'none';
+                }
+            });
+        });
+
+        toggleButton.addEventListener('click', function (e) {
             e.preventDefault();
+
             if (expanded) {
-                descriptionContent.style.maxHeight = '90px'; // Collapse to initial height
+                descriptionContent.style.maxHeight = '90px';
                 toggleButton.textContent = 'Read more';
             } else {
-                descriptionContent.style.maxHeight = originalHeight; // Expand to original height
+                var fullHeight = descriptionContent.dataset.fullHeight || '1000px';
+                descriptionContent.style.maxHeight = fullHeight;
                 toggleButton.textContent = 'Show less';
             }
+
             expanded = !expanded;
         });
     });

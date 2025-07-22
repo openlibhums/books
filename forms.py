@@ -69,6 +69,11 @@ class FormatForm(forms.ModelForm):
 
     file = forms.FileField()
 
+    def __init__(self, *args, **kwargs):
+        super(FormatForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.filename:
+            self.fields['file'].required = False
+
     class Meta:
         model = models.Format
         exclude = ('book', 'filename')
@@ -76,8 +81,10 @@ class FormatForm(forms.ModelForm):
     def save(self, commit=True, *args, **kwargs):
         save_format = super(FormatForm, self).save(commit=False)
         file = self.cleaned_data["file"]
-        filename = files.save_file_to_disk(file, save_format)
-        save_format.filename = filename
+
+        if file:
+            filename = files.save_file_to_disk(file, save_format)
+            save_format.filename = filename
 
         if commit:
             save_format.save()

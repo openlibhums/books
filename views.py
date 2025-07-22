@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import Http404
+from django.utils import timezone
 
 from plugins.books import models, forms, files, logic
 from core import files as core_files
@@ -15,7 +16,7 @@ from repository import models as repository_models
 def index(request, category_slug=None):
     category = None
     books = models.Book.objects.filter(
-        date_published__isnull=False,
+        date_published__lte=timezone.now()
     ).order_by(
         '-date_published',
     )
@@ -161,6 +162,15 @@ def edit_contributor(request, book_id, contributor_id=None):
     form = forms.ContributorForm(instance=contributor, book=book)
 
     if request.POST:
+        if contributor and "delete" in request.POST:
+            contributor.delete()
+            messages.success(request, 'Contributor deleted.')
+            return redirect(
+                reverse(
+                    'books_edit_book',
+                    kwargs={'book_id': book.pk},
+                )
+            )
         form = forms.ContributorForm(request.POST, instance=contributor, book=book)
 
         if form.is_valid():
@@ -183,14 +193,31 @@ def edit_contributor(request, book_id, contributor_id=None):
 @staff_member_required
 def edit_format(request, book_id, format_id=None):
     book_format = None
-    book = get_object_or_404(models.Book, pk=book_id)
+    book = get_object_or_404(
+        models.Book,
+        pk=book_id,
+    )
 
     if format_id:
-        book_format = get_object_or_404(models.Format, pk=format_id, book=book)
+        book_format = get_object_or_404(
+            models.Format,
+            pk=format_id,
+            book=book,
+        )
 
     form = forms.FormatForm(instance=book_format)
 
     if request.POST:
+        if book_format and "delete" in request.POST:
+            book_format.delete()
+            messages.success(request, 'Format deleted.')
+            return redirect(
+                reverse(
+                    'books_edit_book',
+                    kwargs={'book_id': book.pk},
+                )
+            )
+
         form = forms.FormatForm(request.POST, request.FILES, instance=book_format)
         if form.is_valid():
             form_format = form.save(commit=False)
@@ -368,6 +395,16 @@ def books_chapter(request, book_id, chapter_id=None):
     )
 
     if request.POST:
+        if chapter and "delete" in request.POST:
+            chapter.delete()
+            messages.success(request, 'Chapter deleted.')
+            return redirect(
+                reverse(
+                    'books_edit_book',
+                    kwargs={'book_id': book.pk},
+                )
+            )
+
         form = forms.ChapterForm(
             request.POST,
             request.FILES,

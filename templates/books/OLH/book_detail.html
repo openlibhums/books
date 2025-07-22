@@ -34,7 +34,7 @@
             <i class="fa fa-download"></i>&nbsp;
             Download {{ format.title }}
           </a>
-          {% if format.is_epub %}
+          {% if format.is_epub and format.display_read_link %}
             <a href="{% url 'books_read_epub' book.pk format.pk %}"
                target="_blank" class="button read-button">
               <i class="fa fa-book"></i> Read this Book
