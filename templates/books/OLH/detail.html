@@ -27,16 +27,20 @@
         </p>
       {% endif %}
       {% if book.format_set.exists %}
+        {% if book.metrics.views %}
         <p>
         <span class="label-text">
           Views:
         </span> {{ book.metrics.views }}
         </p>
+        {% endif %}
+        {% if book.metrics.downloads %}
         <p>
         <span class="label-text">
           Downloads:
         </span> {{ book.metrics.downloads }}
         </p>
+        {% endif %}
       {% endif %}
       {% if book.license_information %}
         <p><span
