@@ -48,6 +48,7 @@ class BookForm(forms.ModelForm):
         widgets = {
             'description': SummernoteWidget(),
             'date_published': DateInput(),
+            'date_embargo': DateInput(),
         }
 
 
@@ -101,7 +102,19 @@ class ChapterForm(forms.ModelForm):
 
     class Meta:
         model = models.Chapter
-        exclude = ('book', 'filename', 'keywords', 'publisher_notes')
+        fields = [
+            'title',
+            'description',
+            'pages',
+            'doi',
+            'number',
+            'date_embargo',
+            'date_published',
+            'sequence',
+            'contributors',
+            'license_information',
+            'custom_how_to_cite',
+        ]
 
     def save(self, commit=True, book=None, *args, **kwargs):
         save_chapter = super(ChapterForm, self).save(commit=False)

@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import Http404
+from django.db.models import Q
+from django.utils import timezone
 
 from plugins.books import models, forms, files, logic
 from core import files as core_files
@@ -14,11 +16,11 @@ from utils import setting_handler
 
 def index(request, category_slug=None):
     category = None
+    today = timezone.now().date()
     books = models.Book.objects.filter(
-        date_published__isnull=False,
-    ).order_by(
-        '-date_published',
-    )
+        Q(date_published__lte=today) &
+        (Q(date_embargo__isnull=True) | Q(date_embargo__lte=today))
+    ).order_by('-date_published')
 
     if category_slug:
         category = get_object_or_404(
@@ -324,7 +326,15 @@ def book_metrics_by_month(request):
         }
     )
 
-    data, dates, current_year, previous_year = logic.book_metrics_by_month(books, date_parts)
+    data, dates, current_year, previous_year = logic.book_metrics_by_month(
+        books,
+        date_parts,
+    )
+    if request.POST:
+        return logic.export_metrics_by_month(
+            dates,
+            data,
+        )
 
     template = 'books/metrics_by_month.html'
     context = {
