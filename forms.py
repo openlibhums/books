@@ -54,15 +54,15 @@ class BookForm(forms.ModelForm):
 
 class ContributorForm(forms.ModelForm):
 
-    def __init__(self, *args, **kwargs):
-        book = kwargs.pop('book', None)
-        super(ContributorForm, self).__init__(*args, **kwargs)
-
-        self.fields['sequence'].initial = book.get_next_contributor_sequence()
-
     class Meta:
         model = models.Contributor
-        exclude = ('book',)
+        fields = (
+            'first_name',
+            'middle_name',
+            'last_name',
+            'affiliation',
+            'email',
+        )
 
 
 class FormatForm(forms.ModelForm):
@@ -99,11 +99,27 @@ class FormatForm(forms.ModelForm):
 
 class ChapterForm(forms.ModelForm):
 
+    contributors = forms.ModelMultipleChoiceField(
+        queryset=models.Contributor.objects.none(),
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         items = kwargs.pop('items', None)
         super(ChapterForm, self).__init__(*args, **kwargs)
         self.fields['contributors'].widget = TableMultiSelect(items=items)
-        self.fields['contributors'].required = False
+        # Set queryset from items
+        pks = [row.get('object').pk for row in items if row.get('object')]
+        self.fields['contributors'].queryset = models.Contributor.objects.filter(
+            pk__in=pks,
+        )
+        # Set initial from existing ContributorLinks
+        if self.instance and self.instance.pk:
+            self.fields['contributors'].initial = list(
+                models.ContributorLink.objects.filter(
+                    chapter=self.instance,
+                ).values_list('contributor_id', flat=True)
+            )
 
     file = forms.FileField(required=False)
 
@@ -118,7 +134,6 @@ class ChapterForm(forms.ModelForm):
             'date_embargo',
             'date_published',
             'sequence',
-            'contributors',
             'license_information',
             'custom_how_to_cite',
         ]
@@ -138,6 +153,34 @@ class ChapterForm(forms.ModelForm):
             save_chapter.save()
 
         return save_chapter
+
+    def save_chapter_contributors(self, chapter):
+        selected_contributors = self.cleaned_data.get('contributors', [])
+        existing_links = models.ContributorLink.objects.filter(chapter=chapter)
+
+        # Remove links for contributors no longer selected
+        existing_links.exclude(
+            contributor__in=selected_contributors,
+        ).delete()
+
+        # Add links for newly selected contributors
+        existing_contributor_ids = set(
+            existing_links.values_list('contributor_id', flat=True)
+        )
+        next_order = (
+            existing_links.order_by('-order').values_list(
+                'order', flat=True,
+            ).first() or 0
+        ) + 1
+
+        for contributor in selected_contributors:
+            if contributor.pk not in existing_contributor_ids:
+                models.ContributorLink.objects.create(
+                    contributor=contributor,
+                    chapter=chapter,
+                    order=next_order,
+                )
+                next_order += 1
 
 
 class DateForm(forms.Form):

@@ -165,6 +165,12 @@ class Book(models.Model):
         blank=True,
         null=True,
     )
+    contributors = M2MOrderedThroughField(
+        'books.Contributor',
+        through='books.ContributorLink',
+        through_fields=('book', 'contributor'),
+        blank=True,
+    )
 
     def __str__(self):
         return self.title
@@ -181,7 +187,7 @@ class Book(models.Model):
         )
 
     def contributors_citation(self):
-        contributors = self.contributor_set.all()
+        contributors = self.contributors.all()
         if contributors:
             if contributors.count() == 1:
                 return '{contributor} '.format(
@@ -207,18 +213,19 @@ class Book(models.Model):
             return self.title
 
     def first_contributor(self):
-        contributors = self.contributor_set.all()
+        contributors = self.contributors.all()
         if contributors:
             return contributors[0]
         else:
             return 'No Authors'
 
-    def get_next_contributor_sequence(self):
-        if self.contributor_set.all():
-            last_contributor = self.contributor_set.all().reverse()[0]
-            return last_contributor.sequence + 1
-        else:
-            return 1
+    def get_next_contributor_order(self):
+        last_link = ContributorLink.objects.filter(
+            book=self,
+        ).order_by('-order').first()
+        if last_link:
+            return last_link.order + 1
+        return 1
 
     def get_next_chapter_sequence(self):
         chapter_sequences = [c.sequence for c in self.chapter_set.all()]
@@ -291,20 +298,15 @@ class BookPreprint(models.Model):
 
 
 class Contributor(models.Model):
-    book = models.ForeignKey(
-        Book,
-        on_delete=models.CASCADE,
-    )
     first_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
     last_name = models.CharField(max_length=100)
 
     affiliation = models.TextField()
     email = models.EmailField(blank=True, null=True)
-    sequence = models.PositiveIntegerField(default=10)
 
     class Meta:
-        ordering = ('sequence',)
+        ordering = ('last_name', 'first_name')
 
     def __str__(self):
         if not self.middle_name:
@@ -321,6 +323,32 @@ class Contributor(models.Model):
             last_name=self.last_name,
             first_initial=self.first_name[0],
         )
+
+
+class ContributorLink(models.Model):
+    contributor = models.ForeignKey(
+        Contributor,
+        on_delete=models.CASCADE,
+    )
+    book = models.ForeignKey(
+        Book,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    chapter = models.ForeignKey(
+        'Chapter',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    order = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return "{} - {}".format(self.contributor, self.order)
 
 
 class Format(models.Model):
@@ -463,9 +491,11 @@ class Chapter(models.Model):
     sequence = models.PositiveIntegerField(
         help_text='The order in which the chapters should appear.',
     )
-    contributors = models.ManyToManyField(
+    contributors = M2MOrderedThroughField(
         Contributor,
-        null=True,
+        blank=True,
+        through='books.ContributorLink',
+        through_fields=('chapter', 'contributor'),
         related_name='chapter_contributors',
     )
     filename = models.CharField(

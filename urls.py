@@ -60,4 +60,30 @@ urlpatterns = [
         partial_views.remove_preprint,
         name='books_remove_preprint',
     ),
+
+    # Contributor reorder
+    re_path(
+        r'^books/(?P<book_id>\d+)/contributor/(?P<contributor_link_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_book_contributor,
+        name='books_move_contributor',
+    ),
+    re_path(
+        r'^books/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/contributor/(?P<contributor_link_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_chapter_contributor,
+        name='books_move_chapter_contributor',
+    ),
+
+    # Format reorder
+    re_path(
+        r'^books/(?P<book_id>\d+)/format/(?P<format_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_format,
+        name='books_move_format',
+    ),
+
+    # Chapter reorder
+    re_path(
+        r'^books/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_chapter,
+        name='books_move_chapter',
+    ),
 ]

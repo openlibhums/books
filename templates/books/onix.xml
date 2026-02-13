@@ -34,7 +34,7 @@
                 </TitleElement>
             </TitleDetail>
 
-            {% for contributor in book.contributor_set.all %}
+            {% for contributor in book.contributors.all %}
             <Contributor>
                 <SequenceNumber>{{ forloop.counter }}</SequenceNumber>
                 <ContributorRole>A01</ContributorRole>

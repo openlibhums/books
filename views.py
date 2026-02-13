@@ -142,10 +142,23 @@ def edit_book(request, book_id=None):
 
             return redirect(reverse('books_admin'))
 
+    contributor_links = []
+    formats = []
+    chapters = []
+    if book:
+        contributor_links = models.ContributorLink.objects.filter(
+            book=book,
+        ).order_by('order')
+        formats = models.Format.objects.filter(book=book).order_by('sequence')
+        chapters = models.Chapter.objects.filter(book=book).order_by('sequence')
+
     template = 'books/edit_book.html'
     context = {
         'book': book,
         'form': form,
+        'contributor_links': contributor_links,
+        'formats': formats,
+        'chapters': chapters,
     }
 
     return render(request, template, context)
@@ -157,9 +170,13 @@ def edit_contributor(request, book_id, contributor_id=None):
     book = get_object_or_404(models.Book, pk=book_id)
 
     if contributor_id:
-        contributor = get_object_or_404(models.Contributor, pk=contributor_id, book=book)
+        contributor = get_object_or_404(
+            models.Contributor,
+            pk=contributor_id,
+            contributorlink__book=book,
+        )
 
-    form = forms.ContributorForm(instance=contributor, book=book)
+    form = forms.ContributorForm(instance=contributor)
 
     if request.POST:
         if contributor and "delete" in request.POST:
@@ -171,12 +188,18 @@ def edit_contributor(request, book_id, contributor_id=None):
                     kwargs={'book_id': book.pk},
                 )
             )
-        form = forms.ContributorForm(request.POST, instance=contributor, book=book)
+        form = forms.ContributorForm(request.POST, instance=contributor)
 
         if form.is_valid():
-            form_contributor = form.save(commit=False)
-            form_contributor.book = book
-            form_contributor.save()
+            form_contributor = form.save()
+
+            if not contributor:
+                # New contributor: create a ContributorLink to the book
+                models.ContributorLink.objects.create(
+                    contributor=form_contributor,
+                    book=book,
+                    order=book.get_next_contributor_order(),
+                )
 
             return redirect(reverse('books_edit_book', kwargs={'book_id': book.pk}))
 
@@ -307,7 +330,7 @@ def export_onix_xml(
     context = {
         'books': books,
         'chapters': models.Chapter.objects.filter(book__in=books),
-        'contributors': models.Contributor.objects.filter(book__in=books),
+        'contributors': models.Contributor.objects.filter(contributorlink__book__in=books).distinct(),
     }
 
     xml_content = render(request, template, context).content
@@ -411,26 +434,34 @@ def books_chapter(request, book_id, chapter_id=None):
             instance=chapter,
             items=logic.get_chapter_contributor_items(book),
         )
-        form.save(book=book)
-        form.save_m2m()
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            'Chapter Saved.',
-        )
-
-        return redirect(
-            reverse(
-                'books_edit_book',
-                kwargs={'book_id': book.pk},
+        if form.is_valid():
+            saved_chapter = form.save(book=book)
+            form.save_chapter_contributors(saved_chapter)
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Chapter Saved.',
             )
-        )
+
+            return redirect(
+                reverse(
+                    'books_edit_book',
+                    kwargs={'book_id': book.pk},
+                )
+            )
+
+    contributor_links = []
+    if chapter:
+        contributor_links = models.ContributorLink.objects.filter(
+            chapter=chapter,
+        ).order_by('order')
 
     template = 'books/chapter.html'
     context = {
         'form': form,
         'book': book,
         'chapter': chapter,
+        'contributor_links': contributor_links,
     }
 
     return render(request, template, context)

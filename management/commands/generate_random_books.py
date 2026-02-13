@@ -103,20 +103,23 @@ class Command(BaseCommand):
         svg.save()
 
     def create_contributors(self, book, num_contributors):
-        for sequence in range(1, num_contributors + 1):
+        for order in range(1, num_contributors + 1):
             first_name = fake.first_name()
             last_name = fake.last_name()
             middle_name = fake.first_name() if random.choice(
                 [True, False]) else None
 
-            book_models.Contributor.objects.create(
-                book=book,
+            contributor = book_models.Contributor.objects.create(
                 first_name=first_name,
                 middle_name=middle_name,
                 last_name=last_name,
                 affiliation=fake.company(),
                 email=fake.email(),
-                sequence=sequence,
+            )
+            book_models.ContributorLink.objects.create(
+                contributor=contributor,
+                book=book,
+                order=order,
             )
 
     def create_chapters(self, book, num_chapters):
@@ -140,6 +143,10 @@ class Command(BaseCommand):
 
             # Add contributors to each chapter
             num_contributors = random.randint(1, 3)
-            chapter_contributors = book_models.Contributor.objects.filter(
-                book=book).order_by('?')[:num_contributors]
-            chapter.contributors.add(*chapter_contributors)
+            chapter_contributors = book.contributors.order_by('?')[:num_contributors]
+            for order, contributor in enumerate(chapter_contributors, start=1):
+                book_models.ContributorLink.objects.create(
+                    contributor=contributor,
+                    chapter=chapter,
+                    order=order,
+                )

@@ -8,13 +8,19 @@ class BookSettingAdmin(admin.ModelAdmin):
     list_display = ('book_page_title',)
 
 
+class ContributorLinkInline(admin.TabularInline):
+    model = models.ContributorLink
+    extra = 1
+    raw_id_fields = ('contributor',)
+
+
 @admin.register(models.Chapter)
 class ChapterAdmin(admin.ModelAdmin):
     list_display = ('title', 'number', 'book', 'pages', 'doi')
     list_filter = ('book',)
     search_fields = ('title', 'book__title', 'doi')
     raw_id_fields = ('book',)
-    filter_horizontal = ('contributors',)
+    inlines = [ContributorLinkInline]
 
 
 @admin.register(models.BookAccess)
@@ -35,10 +41,15 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(models.Contributor)
 class ContributorAdmin(admin.ModelAdmin):
-    list_display = ('last_name', 'first_name', 'book', 'affiliation', 'sequence')
-    list_filter = ('book',)
+    list_display = ('last_name', 'first_name', 'affiliation')
     search_fields = ('first_name', 'last_name', 'affiliation', 'email')
-    raw_id_fields = ('book',)
+
+
+@admin.register(models.ContributorLink)
+class ContributorLinkAdmin(admin.ModelAdmin):
+    list_display = ('contributor', 'book', 'chapter', 'order')
+    list_filter = ('book', 'chapter')
+    raw_id_fields = ('contributor', 'book', 'chapter')
 
 
 @admin.register(models.Format)

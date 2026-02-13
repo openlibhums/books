@@ -11,6 +11,10 @@
   <li>{% if chapter %}Edit Chapter{% else %}Add Chapter{% endif %}</li>
 {% endblock %}
 
+{% block css %}
+{% include "books/partials/htmx_setup.html" %}
+{% endblock %}
+
 {% block body %}
   <div class="row expanded">
   <div class="large-6 small-12 columns">
@@ -41,6 +45,14 @@
     <div class="large-6 small-12 columns">
       <div class="box">
         <div class="title-area">
+          <h2>Chapter Contributors</h2>
+        </div>
+        <div class="content">
+          {% include "books/partials/chapter_contributors.html" %}
+        </div>
+      </div>
+      <div class="box">
+        <div class="title-area">
           <h2>Delete Chapter</h2>
         </div>
         <div class="content">
@@ -56,3 +68,7 @@
 
 
 {% endblock %}
+
+{% block js %}
+{% include "books/partials/htmx_reorder_js.html" %}
+{% endblock js %}

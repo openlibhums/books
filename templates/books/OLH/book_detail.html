@@ -23,7 +23,7 @@
         </a>
       </h2>
       <p class="authors">
-        {% for contributor in book.contributor_set.all %}
+        {% for contributor in book.contributors.all %}
           {{ contributor }}{% if not forloop.last %}, {% endif %}
         {% endfor %}
       </p>

@@ -10,6 +10,9 @@
     {% if book %}<li>{{ book.title }}</li>{% else %}<li>New Book</li>{% endif %}
 {% endblock %}
 
+{% block css %}
+{% include "books/partials/htmx_setup.html" %}
+{% endblock %}
 
 {% block body %}
     <div class="box">
@@ -32,34 +35,26 @@
                     {% if book %}<a href="{% url 'books_new_contributor' book.pk %}" class="button"><i class="fa fa-user-plus">&nbsp;</i>Add Contributor</a>{% endif %}
                 </div>
                 <div class="content">
-                    <ul class="list-group">
                     {% if not book %}
-                        <li class="list-group-item list-group-item-danger">Save book before adding contributors.</li>
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-danger">Save book before adding contributors.</li>
+                        </ul>
                     {% else %}
-                        {% for cont in book.contributor_set.all %}
-                            <li class="list-group-item"><a href="{% url 'books_edit_contributor' book.pk cont.pk %}">{{ cont }}</a></li>
-                        {% empty %}
-                            <li class="list-group-item list-group-item-info">No contributors</li>
-                        {% endfor %}
+                        {% include "books/partials/book_contributors.html" %}
                     {% endif %}
-                    </ul>
                 </div>
                 <div class="title-area">
                     <h2>Formats</h2>
                     {% if book %}<a href="{% url 'books_new_format' book.pk %}" class="button"><i class="fa fa-book">&nbsp;</i>Add Format</a>{% endif %}
                 </div>
                 <div class="content">
-                    <ul class="list-group">
-                        {% if not book %}
+                    {% if not book %}
+                        <ul class="list-group">
                             <li class="list-group-item list-group-item-danger">Save book before adding formats.</li>
-                        {% else %}
-                            {% for format in book.format_set.all %}
-                                <li class="list-group-item"><a href="{% url 'books_edit_format' book.pk format.pk %}">{{ format }}</a></li>
-                            {% empty %}
-                            <li class="list-group-item list-group-item-info">No formats</li>
-                            {% endfor %}
-                        {% endif %}
-                    </ul>
+                        </ul>
+                    {% else %}
+                        {% include "books/partials/book_formats.html" %}
+                    {% endif %}
                 </div>
                 <div class="title-area">
                     <h2>Chapters</h2>
@@ -68,17 +63,13 @@
                     {% endif %}
                 </div>
                 <div class="content">
-                    <ul class="list-group">
-                        {% if book %}
-                            {% for chapter in book.chapter_set.all %}
-                                <li class="list-group-item"><a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{% if chapter.number %}[{{ chapter.number }}]{% endif %} {{ chapter.title }}</a></li>
-                            {% empty %}
-                            <li class="list-group-item list-group-item-info">No chapters</li>
-                            {% endfor %}
-                        {% else %}
+                    {% if not book %}
+                        <ul class="list-group">
                             <li class="list-group-item list-group-item-danger">Save book before adding chapters.</li>
-                        {% endif %}
-                    </ul>
+                        </ul>
+                    {% else %}
+                        {% include "books/partials/book_chapters.html" %}
+                    {% endif %}
                 </div>
                 {% if book %}
                  <div class="title-area">
@@ -93,3 +84,7 @@
 
     </div>
 {% endblock body %}
+
+{% block js %}
+{% include "books/partials/htmx_reorder_js.html" %}
+{% endblock js %}

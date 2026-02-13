@@ -1,3 +1,5 @@
+import json
+
 from plugins.books import models
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
@@ -151,10 +153,42 @@ def book_metrics_by_month(books, date_parts):
     return data, dates, current_year, previous_year
 
 
-def get_chapter_contributor_items(book):
-    contributors = models.Contributor.objects.filter(
-        book=book,
+def swap_order(item, direction, queryset, order_field='order'):
+    """Swap an item's order with its neighbour in an ordered queryset."""
+    # Normalize orders to be sequential
+    for index, obj in enumerate(queryset):
+        if getattr(obj, order_field) != index:
+            setattr(obj, order_field, index)
+            obj.save()
+    item.refresh_from_db()
+
+    current_order = getattr(item, order_field)
+
+    if direction == 'up':
+        neighbour = queryset.filter(**{order_field: current_order - 1}).first()
+        if neighbour:
+            setattr(neighbour, order_field, current_order)
+            neighbour.save()
+            setattr(item, order_field, current_order - 1)
+            item.save()
+    elif direction == 'down':
+        neighbour = queryset.filter(**{order_field: current_order + 1}).first()
+        if neighbour:
+            setattr(neighbour, order_field, current_order)
+            neighbour.save()
+            setattr(item, order_field, current_order + 1)
+            item.save()
+
+
+def trigger_message(name, direction):
+    """Build a JSON HX-Trigger-After-Swap header value with proper escaping."""
+    return json.dumps(
+        {"showMessage": {"value": "{} moved {}.".format(name, direction)}}
     )
+
+
+def get_chapter_contributor_items(book):
+    contributors = book.contributors.all()
     items = list()
     items.append({'object': None, 'cells': ['First Name', 'Last Name', 'Email']})
 
