@@ -48,6 +48,7 @@ class BookForm(forms.ModelForm):
         exclude = ('keywords', 'publisher_notes', 'linked_repository_objects')
         widgets = {
             'description': SummernoteWidget(),
+            'notes': SummernoteWidget(),
             'date_published': DateInput(),
             'date_embargo': DateInput(),
         }

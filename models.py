@@ -146,6 +146,17 @@ class Book(models.Model):
         related_name="book",
         help_text='Free-text public publisher notes regarding this book',
     )
+
+    language = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Additional notes displayed below the description.',
+    )
     custom_how_to_cite = models.TextField(
         blank=True, null=True,
         help_text="Custom 'how to cite' text. To be used only if the block"
