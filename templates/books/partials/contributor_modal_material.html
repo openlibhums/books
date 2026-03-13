@@ -1,0 +1,19 @@
+{% for contributor in contributors %}
+  {% if contributor.bio or contributor.headshot %}
+    <div id="contributor-modal-{{ contributor.pk }}" class="modal">
+      <div class="modal-content">
+        <h2>{{ contributor }}</h2>
+        {% if contributor.headshot %}
+          <img src="{{ contributor.headshot.url }}" alt="{{ contributor }}"
+               style="max-width: 150px; float: left; margin: 0 1rem 1rem 0;">
+        {% endif %}
+        {% if contributor.affiliation %}
+          <p><em>{{ contributor.affiliation }}</em></p>
+        {% endif %}
+        {% if contributor.bio %}
+          {{ contributor.bio|safe }}
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+{% endfor %}

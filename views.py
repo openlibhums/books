@@ -189,7 +189,7 @@ def edit_contributor(request, book_id, contributor_id=None):
                     kwargs={'book_id': book.pk},
                 )
             )
-        form = forms.ContributorForm(request.POST, instance=contributor)
+        form = forms.ContributorForm(request.POST, request.FILES, instance=contributor)
 
         if form.is_valid():
             form_contributor = form.save()

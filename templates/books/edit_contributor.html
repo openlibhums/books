@@ -11,6 +11,10 @@
   <li>Edit Contributor</li>
 {% endblock %}
 
+{% block css %}
+{% include "books/partials/htmx_setup.html" %}
+{% endblock %}
+
 {% block body %}
   <div class="row expanded">
     <div class="large-6 small-12 columns">
@@ -22,9 +26,27 @@
                   class="fa fa-arrow-left">&nbsp;</i>Back</a>
         </div>
         <div class="content">
-          <form method="POST">
+          <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form|foundation }}
+            <div class="row">
+              <div class="large-12 columns">
+                <label for="id_is_corporate">
+                  {{ form.is_corporate }}
+                  Is Corporate Author
+                </label>
+              </div>
+            </div>
+            <div id="contributor-name-fields"
+                 hx-get="{% url 'books_contributor_name_fields' %}"
+                 hx-trigger="change from:#id_is_corporate"
+                 hx-target="#contributor-name-fields"
+                 hx-include="#id_is_corporate">
+              {% include "books/partials/contributor_name_fields.html" with is_corporate=form.instance.is_corporate %}
+            </div>
+            {{ form.affiliation|foundation }}
+            {{ form.email|foundation }}
+            {{ form.bio|foundation }}
+            {{ form.headshot|foundation }}
             <button class="success button" name="submit">Save</button>
           </form>
         </div>
@@ -36,10 +58,10 @@
         <div class="title-area">
           <h2>Delete Contributor</h2>
         </div>
-        <p>Delete this format using the button below. Please not you cannot recover this format once you delete it.</p>
+        <p>Delete this contributor using the button below. Please note you cannot recover this contributor once you delete it.</p>
         <form method="POST">
           {% csrf_token %}
-          <button name="delete" value="{{ contributor.pk }}" class="warning button">Delete contributor</button>
+          <button name="delete" value="{{ contributor.pk }}" class="warning button">Delete Contributor</button>
         </form>
       </div>
     </div>

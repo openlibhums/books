@@ -61,6 +61,13 @@ urlpatterns = [
         name='books_remove_preprint',
     ),
 
+    # Contributor name fields toggle
+    re_path(
+        r'^admin/contributor/name-fields/$',
+        partial_views.contributor_name_fields,
+        name='books_contributor_name_fields',
+    ),
+
     # Contributor reorder
     re_path(
         r'^books/(?P<book_id>\d+)/contributor/(?P<contributor_link_id>\d+)/move/(?P<direction>up|down)/$',

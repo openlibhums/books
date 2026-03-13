@@ -1,8 +1,19 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 from plugins.books import models, logic
+
+
+@require_GET
+@staff_member_required
+def contributor_name_fields(request):
+    is_corporate = request.GET.get('is_corporate') == 'on'
+    return render(
+        request,
+        'books/partials/contributor_name_fields.html',
+        {'is_corporate': is_corporate},
+    )
 
 
 @require_POST

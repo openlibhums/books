@@ -43,8 +43,7 @@
 
               {% if chapter.contributors.exists %}
                 <p class="authors">
-                  {% for contributor in chapter.contributors.all %}
-                    {{ contributor }}{% if not forloop.last %}, {% endif %}
+                  {% for contributor in chapter.contributors.all %}{% if contributor.bio or contributor.headshot %}<a data-open="contributor-modal-{{ contributor.pk }}">{{ contributor }}</a>{% else %}{{ contributor }}{% endif %}{% if not forloop.last %}, {% endif %}
                   {% endfor %}
                 </p>
               {% endif %}
@@ -118,6 +117,10 @@
     </div>
   </section>
 {% endblock %}
+
+{% with contributors=chapter.contributors.all %}
+  {% include "books/partials/contributor_modal_olh.html" %}
+{% endwith %}
 
 {% block js %}
   {% include "books/OLH/read_more.js" %}

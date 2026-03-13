@@ -59,12 +59,19 @@ class ContributorForm(forms.ModelForm):
     class Meta:
         model = models.Contributor
         fields = (
+            'is_corporate',
+            'corporate_name',
             'first_name',
             'middle_name',
             'last_name',
             'affiliation',
             'email',
+            'bio',
+            'headshot',
         )
+        widgets = {
+            'bio': SummernoteWidget(),
+        }
 
 
 class FormatForm(forms.ModelForm):

@@ -25,6 +25,14 @@ from press import models as press_models
 fs = JanewayFileSystemStorage()
 
 
+def headshot_upload_path(instance, filename):
+    try:
+        filename = str(uuid.uuid4()) + '.' + str(filename.split('.')[1])
+    except IndexError:
+        filename = str(uuid.uuid4())
+    return os.path.join("contributor_headshots/", filename)
+
+
 def cover_images_upload_path(instance, filename):
     try:
         filename = str(uuid.uuid4()) + '.' + str(filename.split('.')[1])
@@ -309,27 +317,47 @@ class BookPreprint(models.Model):
 
 
 class Contributor(models.Model):
-    first_name = models.CharField(max_length=100)
+    is_corporate = models.BooleanField(
+        default=False,
+        help_text='Check if this contributor is a corporate/organisational author.',
+    )
+    corporate_name = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text='Full name of the organisation (used when Is Corporate is checked).',
+    )
+    first_name = models.CharField(max_length=100, blank=True, null=True)
     middle_name = models.CharField(max_length=100, blank=True, null=True)
-    last_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, blank=True, null=True)
 
-    affiliation = models.TextField()
+    affiliation = models.TextField(blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    headshot = models.FileField(
+        upload_to=headshot_upload_path,
+        blank=True,
+        null=True,
+        storage=fs,
+    )
 
     class Meta:
         ordering = ('last_name', 'first_name')
 
     def __str__(self):
-        if not self.middle_name:
-            return "{0} {1}".format(self.first_name, self.last_name)
-        else:
+        if self.is_corporate:
+            return self.corporate_name or ''
+        if self.middle_name:
             return "{0} {1} {2}".format(self.first_name, self.middle_name, self.last_name)
+        return "{0} {1}".format(self.first_name, self.last_name)
 
     def middle_initial(self):
         if self.middle_name:
             return '{middle_initial}.'.format(middle_initial=self.middle_name[0])
 
     def citation_name(self):
+        if self.is_corporate:
+            return self.corporate_name or ''
         return '{last_name} {first_initial}.'.format(
             last_name=self.last_name,
             first_initial=self.first_name[0],

@@ -23,8 +23,7 @@
         </a>
       </h2>
       <p class="authors">
-        {% for contributor in book.contributors.all %}
-          {{ contributor }}{% if not forloop.last %}, {% endif %}
+        {% for contributor in book.contributors.all %}{% if contributor.bio or contributor.headshot %}<a data-open="contributor-modal-{{ contributor.pk }}">{{ contributor }}</a>{% else %}{{ contributor }}{% endif %}{% if not forloop.last %}, {% endif %}
         {% endfor %}
       </p>
       <div class="button-group">
@@ -83,6 +82,10 @@
   {% if not books %}
     {% include "books/OLH/detail.html" %}
   {% endif %}
+
+  {% with contributors=book.contributors.all %}
+    {% include "books/partials/contributor_modal_olh.html" %}
+  {% endwith %}
 
 </div>
 

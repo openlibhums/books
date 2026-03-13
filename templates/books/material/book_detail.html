@@ -13,7 +13,7 @@
             {% else %}
                 <h2>{% if books %}<a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}{% if books %}</a>{% endif %}</h2>
                 <h6><em>{% for contributor in book.contributors.all %}{% if not forloop.first and not forloop.last %},
-                {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
+                {% elif forloop.last and not forloop.first %} & {% endif %}{% if contributor.bio or contributor.headshot %}<a class="modal-trigger" href="#contributor-modal-{{ contributor.pk }}">{{ contributor }}</a>{% else %}{{ contributor }}{% endif %}{% endfor %}</em></h6>
             {% endif %}
 
             {% if book.remote_url and book.remote_book_label %}
@@ -63,6 +63,10 @@
         {% endif %}
     </div>
 </div>
+
+{% with contributors=book.contributors.all %}
+  {% include "books/partials/contributor_modal_material.html" %}
+{% endwith %}
 
 {% block css %}
 <style>
