@@ -1,0 +1,19 @@
+<script>
+    document.body.addEventListener('htmx:configRequest', function(event) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        if (csrfToken) {
+            event.detail.headers['X-CSRFToken'] = csrfToken;
+        }
+    });
+    toastr.options.preventDuplicates = true;
+    toastr.options.newestOnTop = true;
+    toastr.options.maxOpened = 1;
+    document.body.addEventListener('showMessage', function(event) {
+        toastr.clear();
+        toastr.success(event.detail.value);
+    });
+    document.body.addEventListener('htmx:responseError', function(event) {
+        toastr.clear();
+        toastr.error('Failed to update order.');
+    });
+</script>

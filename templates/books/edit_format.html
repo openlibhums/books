@@ -5,30 +5,53 @@
 {% block admin-header %}Books Admin{% endblock %}
 
 {% block breadcrumbs %}
-    {{ block.super }}
-    <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
-    <li><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></li>
-    <li>Edit Format</li>
+  {{ block.super }}
+  <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+  <li><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></li>
+  <li>Edit Format</li>
 {% endblock %}
 
 {% block body %}
-    <div class="box">
-        <div class="row expanded">
-            <div class="title-area">
-                <h2>{% if contributor %}Editing {{ format }}{% else %}Adding Format to {{ book }}{% endif %}</h2>
-                <a href="{% url 'books_edit_book' book.pk %}" class="button"><i class="fa fa-arrow-left">&nbsp;</i>Back</a>
-            </div>
-            <div class="content">
-                {% include "elements/forms/errors.html" %}
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form|foundation }}
-                    <div class="large-12 columns">
-                        <p>{% if format.filename %}Current File: <a href="{% url 'books_download_format' book.pk format.pk %}"><i class="fa fa-download">&nbsp;</i>{{ format.filename }}</a>{% endif %}</p>
-                    </div>
-                    <button class="success button" name="submit">Save</button>
-                </form>
-            </div>
+  <div class="row expanded">
+    <div class="large-6 small-12 columns">
+      <div class="box">
+        <div class="title-area">
+          <h2>{% if contributor %}Editing {{ format }}{% else %}Adding Format to
+            {{ book }}{% endif %}</h2>
+          <a href="{% url 'books_edit_book' book.pk %}" class="button"><i
+                  class="fa fa-arrow-left">&nbsp;</i>Back</a>
         </div>
+        <div class="content">
+          {% include "elements/forms/errors.html" %}
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|foundation }}
+            <div class="large-12 columns">
+              <p>{% if format.filename %}Current File:
+                <a href="{% url 'books_download_format' book.pk format.pk %}"><i
+                        class="fa fa-download">&nbsp;</i>{{ format.filename }}
+                </a>{% endif %}
+              </p>
+            </div>
+            <button class="success button" name="submit">Save</button>
+          </form>
+        </div>
+      </div>
     </div>
+    {% if format %}
+    <div class="large-6 small-12 columns">
+      <div class="box">
+        <div class="title-area">
+          <h2>Delete Format</h2>
+        </div>
+        <p>Delete this format using the button below. Please not you cannot recover this format once you delete it.</p>
+        <form method="POST">
+          {% csrf_token %}
+          <button name="delete" value="{{ format.pk }}" class="warning button">Delete format</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
 {% endblock %}
