@@ -34,14 +34,8 @@
                 <h3>Category</h3>
                 <p><a href="{% url 'books_index_category' book.category.slug %}">{{ book.category.name }}</a></p>
             {% endif %}
-            {% if book.language %}
-                <p><strong>Language:</strong> {{ book.language }}</p>
-            {% endif %}
             <h3>Description</h3>
             {{ book.description|safe }}
-            {% if book.notes %}
-                {{ book.notes|safe }}
-            {% endif %}
             {% if books %}
                 <p>
                     <a href="{% url 'books_book' book.pk %}">View more detail <i class="fa fa-arrow-right"></i></a>

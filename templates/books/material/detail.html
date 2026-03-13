@@ -23,6 +23,14 @@
         {% if chapters %}
             <td>{{ chapters.count }}</td>{% endif %}
     </tr>
+    {% if book.language %}
+        <tr>
+            <th colspan="100">Language</th>
+        </tr>
+        <tr>
+            <td colspan="100">{{ book.language }}</td>
+        </tr>
+    {% endif %}
     {% if book.license_information %}
         <tr>
             <th colspan="100">License Information</th>
@@ -55,3 +63,7 @@
         </tr>
     {% endif %}
 </table>
+{% if book.notes %}
+    <h3>Notes</h3>
+    {{ book.notes|safe }}
+{% endif %}

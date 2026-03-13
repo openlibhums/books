@@ -64,9 +64,6 @@
             {{ keyword.word }}{% endfor %}</p>
         </div>
       {% endif %}
-      {% if book.language %}
-        <p><strong>Language:</strong> {{ book.language }}</p>
-      {% endif %}
       <div class="description-container">
         <h3 class="section-title">Description</h3>
         <div class="description-content" id="description-content">
@@ -75,11 +72,6 @@
         <a href="#" class="toggle-description" id="toggle-description">Read
           more</a>
       </div>
-      {% if book.notes %}
-        <div class="notes-container">
-          {{ book.notes|safe }}
-        </div>
-      {% endif %}
       {% if index %}
         <a class="button read-button" href="{% url "books_book" book.pk %}">
           View detail&nbsp;<span class="fa fa-arrow-circle-right">&nbsp;</span>

@@ -16,6 +16,9 @@
       {% if book.isbn %}
         <p><span class="label-text">ISBN:</span> {{ book.isbn }}</p>
       {% endif %}
+      {% if book.language %}
+        <p><span class="label-text">Language:</span> {{ book.language }}</p>
+      {% endif %}
       {% if book.peer_reviewed %}
         <p><span class="label-text">Peer Review: </span><i class="fa fa-check"> Yes</i>
       {% endif %}
@@ -87,6 +90,12 @@
           </li>
         {% endfor %}
       </ul>
+    </div>
+  {% endif %}
+  {% if book.notes %}
+    <div class="section">
+      <h3 class="section-title">Notes</h3>
+      {{ book.notes|safe }}
     </div>
   {% endif %}
 </div>

@@ -45,7 +45,7 @@ class BookForm(forms.ModelForm):
 
     class Meta:
         model = models.Book
-        exclude = ('keywords', 'publisher_notes', 'linked_repository_objects')
+        exclude = ('keywords', 'publisher_notes', 'linked_repository_objects', 'contributors')
         widgets = {
             'description': SummernoteWidget(),
             'notes': SummernoteWidget(),
