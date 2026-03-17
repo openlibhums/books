@@ -14,8 +14,8 @@
       </a>
     </div>
     <div class="medium-8 large-9 columns book-info">
-      {% if book.category %}
-        <div class="category">{{ book.category.name }}</div>
+      {% if book.categories.exists %}
+        <p class="categories">{% for cat in book.categories.all %}<a href="{% url 'books_index_category' cat.slug %}">{{ cat.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
       {% endif %}
       <h2 class="book-title">
         <a href="{% url 'books_book' book.pk %}">
@@ -50,8 +50,7 @@
         {% if book.purchase_url %}
           <a href="{{ book.purchase_url }}" class="button read-button"
              target="_blank">
-            {% if book.category %}{{ book.category.buy_button_text }}{% else %}
-              Buy this Book{% endif %}
+            {% with cat=book.categories.first %}{% if cat %}{{ cat.buy_button_text }}{% else %}Buy this Book{% endif %}{% endwith %}
             &nbsp;<span class="fa fa-external-link" aria-hidden="true"></span>
           </a>
         {% endif %}

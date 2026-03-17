@@ -33,10 +33,9 @@ class BookAccessAdmin(admin.ModelAdmin):
 @admin.register(models.Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = ('title', 'publisher_name', 'date_published', 'is_open_access')
-    list_filter = ('is_open_access', 'peer_reviewed', 'date_published', 'category')
+    list_filter = ('is_open_access', 'peer_reviewed', 'date_published', 'categories')
     search_fields = ('title', 'subtitle', 'publisher_name', 'isbn', 'doi')
-    raw_id_fields = ('category',)
-    filter_horizontal = ('keywords', 'publisher_notes', 'linked_repository_objects')
+    filter_horizontal = ('keywords', 'publisher_notes', 'linked_repository_objects', 'categories')
 
 
 @admin.register(models.Contributor)

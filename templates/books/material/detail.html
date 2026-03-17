@@ -8,9 +8,7 @@
             <th>ISBN</th>{% endif %}
         {% if book.doi %}
             <th>DOI</th>{% endif %}
-        {% if chapters %}
-            <th>{% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}
-                Chapters{% endif %}</th>{% endif %}
+        {% if chapters %}{% with cat=book.categories.first %}<th>{% if cat %}{{ cat.chapter_name_plural|capfirst }}{% else %}Chapters{% endif %}</th>{% endwith %}{% endif %}
     </tr>
     <tr>
         <td>{{ book.date_published }}</td>
@@ -41,16 +39,18 @@
     {% endif %}
     {% if chapters %}
         <tr>
-            <th colspan="100">
-                {% if book.category %}{{ book.category.chapter_name_plural|capfirst }}{% else %}Chapters{% endif %}</th>
+            {% with cat=book.categories.first %}
+            <th colspan="100">{% if cat %}{{ cat.chapter_name_plural|capfirst }}{% else %}Chapters{% endif %}</th>
+            {% endwith %}
         </tr>
         <tr>
             <td colspan="100">
+                {% with cat=book.categories.first %}
                 <p>
                     {{ book.full_title }} has the following
-                    {% if book.category %}{{ book.category.chapter_name_plural }}{% else %}
-                        Chapters{% endif %}
+                    {% if cat %}{{ cat.chapter_name_plural }}{% else %}Chapters{% endif %}
                 </p>
+                {% endwith %}
                 <ul>
                     {% for chapter in chapters %}
                         <li><a href="{% url 'book_view_chapter' book.pk chapter.pk %}">

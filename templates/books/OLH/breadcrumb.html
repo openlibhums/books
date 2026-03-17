@@ -3,13 +3,13 @@
     <li><a href="{% url 'books_index' %}">Book List</a></li>
 
     {% if book %}
-      {% if book.category %}
+      {% for cat in book.categories.all %}
         <li>
-          <a href="{% url 'books_index_category' category_slug=book.category.slug %}">
-            {{ book.category.name }}
+          <a href="{% url 'books_index_category' category_slug=cat.slug %}">
+            {{ cat.name }}
           </a>
         </li>
-      {% endif %}
+      {% endfor %}
 
       <li>
         <span>{{ book.full_title }}</span>

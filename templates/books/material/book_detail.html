@@ -26,13 +26,13 @@
 
             {% if book.purchase_url %}
                 <a href="{{ book.purchase_url }}" class="waves-effect waves-light btn" target="_blank">
-                    {% if book.category %}{{ book.category.buy_button_text }}{% else %}Buy this Book{% endif %}
+                    {% with cat=book.categories.first %}{% if cat %}{{ cat.buy_button_text }}{% else %}Buy this Book{% endif %}{% endwith %}
                     <span class="fa fa-external-link" aria-hidden="true"></span>
                 </a>
             {% endif %}
-            {% if book.category %}
-                <h3>Category</h3>
-                <p><a href="{% url 'books_index_category' book.category.slug %}">{{ book.category.name }}</a></p>
+            {% if book.categories.exists %}
+                <h3>{% if book.categories.count == 1 %}Category{% else %}Categories{% endif %}</h3>
+                <p>{% for cat in book.categories.all %}<a href="{% url 'books_index_category' cat.slug %}">{{ cat.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
             {% endif %}
             <h3>Description</h3>
             {{ book.description|safe }}
