@@ -53,7 +53,6 @@ class Command(BaseCommand):
             book = book_models.Book.objects.create(
                 title=title,
                 subtitle=subtitle,
-                category=category,
                 description=fake.text(max_nb_chars=200),
                 pages=random.randint(100, 500),
                 is_edited_volume=random.choice([True, False]),
@@ -67,6 +66,8 @@ class Command(BaseCommand):
                 license_information=fake.sentence(nb_words=10),
                 cover=f'cover_images/{cover_filename}',
             )
+            if category:
+                book.categories.add(category)
 
             # Add random contributors
             num_contributors = random.randint(2, 10)
@@ -138,7 +139,6 @@ class Command(BaseCommand):
                 number=str(sequence),
                 date_published=fake.date_this_century(),
                 sequence=sequence,
-                filename=f"{title.replace(' ', '_')}.pdf",
             )
 
             # Add contributors to each chapter

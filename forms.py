@@ -106,6 +106,33 @@ class FormatForm(forms.ModelForm):
         return cleaned_data
 
 
+class ChapterFormatForm(forms.ModelForm):
+
+    file = forms.FileField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.filename:
+            self.fields['file'].required = False
+
+    class Meta:
+        model = models.ChapterFormat
+        exclude = ('chapter', 'filename')
+
+    def save(self, commit=True, *args, **kwargs):
+        chapter_format = super().save(commit=False)
+        file = self.cleaned_data.get('file')
+
+        if file:
+            filename = files.save_file_to_disk(file, chapter_format)
+            chapter_format.filename = filename
+
+        if commit:
+            chapter_format.save()
+
+        return chapter_format
+
+
 class ChapterForm(forms.ModelForm):
 
     contributors = forms.ModelMultipleChoiceField(
@@ -130,8 +157,6 @@ class ChapterForm(forms.ModelForm):
                 ).values_list('contributor_id', flat=True)
             )
 
-    file = forms.FileField(required=False)
-
     class Meta:
         model = models.Chapter
         fields = [
@@ -152,11 +177,6 @@ class ChapterForm(forms.ModelForm):
 
         if book:
             save_chapter.book = book
-
-        file = self.cleaned_data["file"]
-        if file:
-            filename = files.save_file_to_disk(file, save_chapter)
-            save_chapter.filename = filename
 
         if commit:
             save_chapter.save()

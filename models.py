@@ -94,11 +94,9 @@ class Book(models.Model):
     prefix = models.CharField(max_length=20, blank=True, null=True)
     title = models.CharField(max_length=300)
     subtitle = models.CharField(max_length=300, blank=True, null=True)
-    category = models.ForeignKey(
+    categories = models.ManyToManyField(
         Category,
         blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
     )
     description = models.TextField(null=True, blank=True)
     pages = models.PositiveIntegerField(null=True, blank=True)
@@ -454,6 +452,22 @@ class Format(models.Model):
                 )
 
 
+class ChapterFormat(models.Model):
+    chapter = models.ForeignKey(
+        'Chapter',
+        on_delete=models.CASCADE,
+    )
+    title = models.CharField(max_length=100)
+    filename = models.CharField(max_length=100)
+    sequence = models.PositiveIntegerField(default=10)
+
+    class Meta:
+        ordering = ('sequence',)
+
+    def __str__(self):
+        return self.title
+
+
 def access_choices():
     return (
         ('download', 'Download'),  # A download of any book format
@@ -536,9 +550,6 @@ class Chapter(models.Model):
         through='books.ContributorLink',
         through_fields=('chapter', 'contributor'),
         related_name='chapter_contributors',
-    )
-    filename = models.CharField(
-        max_length=255,
     )
     license_information = models.TextField(
         blank=True,

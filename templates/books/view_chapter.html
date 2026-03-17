@@ -21,9 +21,10 @@
                     <h2>{{ chapter.title }}</h2>
                     <h3><em>{% for contributor in chapter.contributors.all %}{% if not forloop.first and not forloop.last %},
             {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h3>
-                    <p>This {% if book.category %}{{ book.category.chapter_name }}{% else %}chapter{% endif %} is part of: {{ book.citation|safe }}</p>
-                    <a href="{% url 'books_download_chapter' book.pk chapter.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download
-                        {% if book.category %}{{ book.category.chapter_name|capfirst }}{% else %}Chapter{% endif %}</a>
+                    {% with cat=book.categories.first %}<p>This {% if cat %}{{ cat.chapter_name }}{% else %}chapter{% endif %} is part of: {{ book.citation|safe }}</p>
+                    {% for fmt in chapter.chapterformat_set.all %}
+                      <a href="{% url 'books_download_chapter_format' book.pk chapter.pk fmt.pk %}" class="button"><i class="fa fa-download">&nbsp;</i> Download {% if cat %}{{ cat.chapter_name|capfirst }}{% else %}Chapter{% endif %}{% if chapter.chapterformat_set.count > 1 %}: {{ fmt.title }}{% endif %}</a>
+                    {% endfor %}{% endwith %}
                     <table class="table" style="margin-bottom: 0;">
                         <tr>
                             <th>Description</th>

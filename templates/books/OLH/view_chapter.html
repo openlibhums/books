@@ -33,8 +33,8 @@
             </div>
 
             <div class="medium-8 large-9 columns book-info">
-              {% if book.category %}
-                <div class="category">{{ book.category.name }}</div>
+              {% if book.categories.exists %}
+                <p class="categories">{% for cat in book.categories.all %}<a href="{% url 'books_index_category' cat.slug %}">{{ cat.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
               {% endif %}
 
               <h2 class="book-title">
@@ -49,18 +49,20 @@
               {% endif %}
 
               <p class="chapter-parent">
-                This {% if book.category %}{{ book.category.chapter_name }}{% else %}
-                chapter{% endif %}
+                This {% with cat=book.categories.first %}{% if cat %}{{ cat.chapter_name }}{% else %}chapter{% endif %}{% endwith %}
                 is part of: {{ book.citation|safe }}
               </p>
 
               <div class="button-group">
-                <a href="{% url 'books_download_chapter' book.pk chapter.pk %}"
-                   class="button read-button">
-                  <i class="fa fa-download"></i>&nbsp;
-                  Download {% if book.category %}
-                  {{ book.category.chapter_name|capfirst }}{% else %}Chapter{% endif %}
-                </a>
+                {% with cat=book.categories.first %}
+                  {% for fmt in chapter.chapterformat_set.all %}
+                    <a href="{% url 'books_download_chapter_format' book.pk chapter.pk fmt.pk %}"
+                       class="button read-button">
+                      <i class="fa fa-download"></i>&nbsp;
+                      Download {% if cat %}{{ cat.chapter_name|capfirst }}{% else %}Chapter{% endif %}{% if chapter.chapterformat_set.count > 1 %}: {{ fmt.title }}{% endif %}
+                    </a>
+                  {% endfor %}
+                {% endwith %}
               </div>
 
               {% if chapter.description %}

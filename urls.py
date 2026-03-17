@@ -15,6 +15,11 @@ urlpatterns = [
     re_path(r'^(?P<book_id>\d+)/format/(?P<chapter_id>\d+)/download/$',
         views.download_chapter,
         name='books_download_chapter'),
+    re_path(
+        r'^(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/format/(?P<chapter_format_id>\d+)/download/$',
+        views.download_chapter_format,
+        name='books_download_chapter_format',
+    ),
 
     re_path(r'^admin/$', views.admin, name='books_admin'),
     re_path(r'^admin/categories/$', views.categories, name='books_categories'),
@@ -33,6 +38,16 @@ urlpatterns = [
     re_path(r'^admin/edit/(?P<book_id>\d+)/chapter/edit/(?P<chapter_id>\d+)/$',
         views.books_chapter,
         name='books_edit_chapter'),
+    re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/format/new/$',
+        views.edit_chapter_format,
+        name='books_new_chapter_format',
+    ),
+    re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/format/(?P<chapter_format_id>\d+)/$',
+        views.edit_chapter_format,
+        name='books_edit_chapter_format',
+    ),
 
     re_path(r'^admin/import/$', views.import_books_upload, name='books_import_books_upload'),
     re_path(r'^admin/import/(?P<uuid>.+)/process/$', views.import_books_process, name='books_import_process'),

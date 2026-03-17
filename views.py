@@ -27,7 +27,7 @@ def index(request, category_slug=None):
             models.Category,
             slug=category_slug,
         )
-        books = books.filter(category=category)
+        books = books.filter(categories=category)
 
     template = 'books/{}/index.html'.format(request.press.theme)
     context = {
@@ -107,11 +107,39 @@ def download_chapter(request, book_id, chapter_id, mark_download='yes'):
         book=book,
     )
 
+    chapter_format = models.ChapterFormat.objects.filter(chapter=chapter).first()
+    if not chapter_format:
+        raise Http404
+
     if mark_download == 'yes':
         chapter.add_book_access(request, 'download')
 
-    # Handle serving the file here
-    return files.server_chapter_file(chapter)
+    return files.serve_chapter_format_file(chapter_format)
+
+
+def download_chapter_format(request, book_id, chapter_id, chapter_format_id, mark_download='yes'):
+    request.session.save()
+
+    book = get_object_or_404(
+        models.Book,
+        pk=book_id,
+        date_published__isnull=False,
+    )
+    chapter = get_object_or_404(
+        models.Chapter,
+        pk=chapter_id,
+        book=book,
+    )
+    chapter_format = get_object_or_404(
+        models.ChapterFormat,
+        pk=chapter_format_id,
+        chapter=chapter,
+    )
+
+    if mark_download == 'yes':
+        chapter.add_book_access(request, 'download')
+
+    return files.serve_chapter_format_file(chapter_format)
 
 
 @staff_member_required
@@ -254,6 +282,50 @@ def edit_format(request, book_id, format_id=None):
     context = {
         'book': book,
         'format': book_format,
+        'form': form,
+    }
+
+    return render(request, template, context)
+
+
+@staff_member_required
+def edit_chapter_format(request, book_id, chapter_id, chapter_format_id=None):
+    book = get_object_or_404(models.Book, pk=book_id)
+    chapter = get_object_or_404(models.Chapter, pk=chapter_id, book=book)
+    chapter_format = None
+
+    if chapter_format_id:
+        chapter_format = get_object_or_404(
+            models.ChapterFormat,
+            pk=chapter_format_id,
+            chapter=chapter,
+        )
+
+    form = forms.ChapterFormatForm(instance=chapter_format)
+
+    if request.POST:
+        if chapter_format and 'delete' in request.POST:
+            chapter_format.delete()
+            messages.success(request, 'Chapter format deleted.')
+            return redirect(
+                reverse('books_edit_chapter', kwargs={'book_id': book.pk, 'chapter_id': chapter.pk})
+            )
+
+        form = forms.ChapterFormatForm(request.POST, request.FILES, instance=chapter_format)
+        if form.is_valid():
+            saved_format = form.save(commit=False)
+            saved_format.chapter = chapter
+            saved_format.save()
+            messages.success(request, 'Chapter format saved.')
+            return redirect(
+                reverse('books_edit_chapter', kwargs={'book_id': book.pk, 'chapter_id': chapter.pk})
+            )
+
+    template = 'books/edit_chapter_format.html'
+    context = {
+        'book': book,
+        'chapter': chapter,
+        'chapter_format': chapter_format,
         'form': form,
     }
 
@@ -460,10 +532,14 @@ def books_chapter(request, book_id, chapter_id=None):
             )
 
     contributor_links = []
+    chapter_formats = []
     if chapter:
         contributor_links = models.ContributorLink.objects.filter(
             chapter=chapter,
         ).order_by('order')
+        chapter_formats = models.ChapterFormat.objects.filter(
+            chapter=chapter,
+        ).order_by('sequence')
 
     template = 'books/chapter.html'
     context = {
@@ -471,6 +547,7 @@ def books_chapter(request, book_id, chapter_id=None):
         'book': book,
         'chapter': chapter,
         'contributor_links': contributor_links,
+        'chapter_formats': chapter_formats,
     }
 
     return render(request, template, context)
