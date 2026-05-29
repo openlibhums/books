@@ -181,6 +181,7 @@ class Book(models.Model):
     edition = models.CharField(
         blank=True,
         null=True,
+        max_length=255,
     )
     contributors = M2MOrderedThroughField(
         'books.Contributor',

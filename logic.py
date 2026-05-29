@@ -4,6 +4,7 @@ from plugins.books import models
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
+from django.db import transaction
 from django.utils import timezone
 
 
@@ -154,30 +155,37 @@ def book_metrics_by_month(books, date_parts):
 
 
 def swap_order(item, direction, queryset, order_field='order'):
-    """Swap an item's order with its neighbour in an ordered queryset."""
-    # Normalize orders to be sequential
-    for index, obj in enumerate(queryset):
-        if getattr(obj, order_field) != index:
-            setattr(obj, order_field, index)
-            obj.save()
-    item.refresh_from_db()
+    """Swap an item's order with its neighbour, locking rows to avoid races."""
+    with transaction.atomic():
+        # Lock the rows so concurrent reorders (e.g. double-clicks) serialise.
+        objects = list(queryset.select_for_update())
 
-    current_order = getattr(item, order_field)
+        # Normalise orders to be sequential.
+        for index, obj in enumerate(objects):
+            if getattr(obj, order_field) != index:
+                setattr(obj, order_field, index)
+                obj.save(update_fields=[order_field])
 
-    if direction == 'up':
-        neighbour = queryset.filter(**{order_field: current_order - 1}).first()
+        item.refresh_from_db()
+        current_order = getattr(item, order_field)
+
+        if direction == 'up':
+            target_order = current_order - 1
+        elif direction == 'down':
+            target_order = current_order + 1
+        else:
+            return
+
+        neighbour = next(
+            (obj for obj in objects
+             if getattr(obj, order_field) == target_order),
+            None,
+        )
         if neighbour:
             setattr(neighbour, order_field, current_order)
-            neighbour.save()
-            setattr(item, order_field, current_order - 1)
-            item.save()
-    elif direction == 'down':
-        neighbour = queryset.filter(**{order_field: current_order + 1}).first()
-        if neighbour:
-            setattr(neighbour, order_field, current_order)
-            neighbour.save()
-            setattr(item, order_field, current_order + 1)
-            item.save()
+            neighbour.save(update_fields=[order_field])
+            setattr(item, order_field, target_order)
+            item.save(update_fields=[order_field])
 
 
 def trigger_message(name, direction):

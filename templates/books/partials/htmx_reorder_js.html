@@ -16,4 +16,22 @@
         toastr.clear();
         toastr.error('Failed to update order.');
     });
+
+    // Disable list buttons while a request is in flight to block double-clicks.
+    function reorderButtons(triggeringElement) {
+        const list = triggeringElement.closest('ul.list-group');
+        return list ? list.querySelectorAll('button') : [];
+    }
+    document.body.addEventListener('htmx:beforeRequest', function(event) {
+        reorderButtons(event.detail.elt).forEach(function(button) {
+            button.disabled = true;
+        });
+    });
+    document.body.addEventListener('htmx:afterRequest', function(event) {
+        if (!event.detail.successful) {
+            reorderButtons(event.detail.elt).forEach(function(button) {
+                button.disabled = false;
+            });
+        }
+    });
 </script>
