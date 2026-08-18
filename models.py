@@ -522,6 +522,9 @@ class Chapter(models.Model):
     def contributors_citation(self):
         contributors = self.contributors.all()
 
+        if not contributors:
+            return ''
+
         if contributors.count() == 1:
             return '{contributor} '.format(
                 contributor=contributors[0].citation_name()
@@ -532,7 +535,9 @@ class Chapter(models.Model):
                 contributor_two=contributors[1].citation_name(),
             )
         else:
-            return '{contributor} et al. '.format(contributor=contributors[0])
+            return '{contributor} et al. '.format(
+                contributor=contributors[0].citation_name(),
+            )
 
 
 class KeywordBook(models.Model):

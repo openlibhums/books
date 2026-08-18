@@ -102,3 +102,41 @@ class BookMetricsTests(TestCase):
             SERVER_NAME=self.press.domain,
         )
         self.assertEqual(response.status_code, 302)
+
+
+class ChapterCitationTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.book = models.Book.objects.create(
+            title='Test Book',
+            publisher_name='Test Publisher',
+            publisher_loc='Test Location',
+        )
+        cls.chapter = models.Chapter.objects.create(
+            book=cls.book,
+            title='Test Chapter',
+            description='A chapter for citation tests.',
+            sequence=1,
+        )
+        cls.contributors = [
+            models.Contributor.objects.create(
+                book=cls.book,
+                first_name=first_name,
+                last_name=last_name,
+                affiliation='Test University',
+                sequence=sequence,
+            )
+            for sequence, (first_name, last_name) in enumerate(
+                [('Ada', 'Lovelace'), ('Charles', 'Babbage'), ('Alan', 'Turing')]
+            )
+        ]
+
+    def test_chapter_citation_with_no_contributors(self):
+        self.assertEqual(self.chapter.contributors_citation(), '')
+
+    def test_chapter_citation_uses_citation_name_for_et_al(self):
+        self.chapter.contributors.set(self.contributors)
+        self.assertEqual(
+            self.chapter.contributors_citation(),
+            'Lovelace A. et al. ',
+        )
