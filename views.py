@@ -330,7 +330,7 @@ def book_metrics_by_month(request):
         books,
         date_parts,
     )
-    if request.POST:
+    if request.method == 'POST':
         return logic.export_metrics_by_month(
             dates,
             data,
