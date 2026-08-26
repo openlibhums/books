@@ -1,3 +1,4 @@
+import csv
 import json
 
 from plugins.books import models
@@ -5,6 +6,7 @@ from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.db import transaction
+from django.http import HttpResponse
 from django.utils import timezone
 
 
@@ -74,13 +76,13 @@ def book_metrics_data(books, start_date, end_date):
 
         views = book_accesses.filter(
             type='view',
-            accessed__gte=start_date,
-            accessed__lte=end_date,
+            accessed__date__gte=start_date,
+            accessed__date__lte=end_date,
         )
         downloads = book_accesses.filter(
             type='download',
-            accessed__gte=start_date,
-            accessed__lte=end_date,
+            accessed__date__gte=start_date,
+            accessed__date__lte=end_date,
         )
 
         book_data['book'] = book
@@ -152,6 +154,29 @@ def book_metrics_by_month(books, date_parts):
         data.append(book_data)
 
     return data, dates, current_year, previous_year
+
+
+def export_metrics_by_month(dates, data):
+    """
+    Serves a CSV of book access metrics by month.
+    :param dates: list of date objects, one per month column
+    :param data: list of dicts from book_metrics_by_month
+    :return: HttpResponse with a CSV attachment
+    """
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = (
+        'attachment; filename="book_metrics_by_month.csv"'
+    )
+    writer = csv.writer(response)
+    writer.writerow(
+        ['Book', 'Book ID'] + [d.strftime('%b %Y') for d in dates]
+    )
+    for item in data:
+        writer.writerow(
+            [item['book'].title, item['book'].pk] + item['date_metrics']
+        )
+
+    return response
 
 
 def swap_order(item, direction, queryset, order_field='order'):
