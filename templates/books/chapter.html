@@ -5,31 +5,94 @@
 {% block admin-header %}Books Admin{% endblock %}
 
 {% block breadcrumbs %}
-    {{ block.super }}
-    <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
-    <li><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></li>
-    <li>{% if chapter %}Edit Chapter{% else %}Add Chapter{% endif %}</li>
+  {{ block.super }}
+  <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
+  <li><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></li>
+  <li>{% if chapter %}Edit Chapter{% else %}Add Chapter{% endif %}</li>
+{% endblock %}
+
+{% block css %}
+{% include "books/partials/htmx_setup.html" %}
 {% endblock %}
 
 {% block body %}
+  <div class="row expanded">
+  <div class="large-6 small-12 columns">
     <div class="box">
-        <div class="row expanded">
-            <div class="title-area">
-                <h2>{% if chapter %}Edit Chapter{% else %}Add Chapter{% endif %}</h2>
-            </div>
-            <div class="content">
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {% include "admin/elements/forms/errors.html" %}
-                    {{ form|foundation }}
-                    <div class="row expanded">
-                        <div class="large-12 columns">
-                            {% if chapter.filename %}<p>Current file: <a href="{% url 'books_download_chapter' book.pk chapter.pk %}">{{ chapter.filename }}</a></p>{% endif %}
-                        </div>
-                    </div>
-                    <button class="success button" name="submit">Save</button>
-                </form>
-            </div>
-        </div>
+      <div class="title-area">
+        <h2>{% if chapter %}Edit Chapter{% else %}Add Chapter{% endif %}</h2>
+      <a href="{% url 'books_edit_book' book.pk %}" class="button"><i
+                  class="fa fa-arrow-left">&nbsp;</i>Back</a>
+      </div>
+      <div class="content">
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% include "admin/elements/forms/errors.html" %}
+          {{ form|foundation }}
+          <button class="success button" name="submit">Save</button>
+        </form>
+      </div>
     </div>
+  </div>
+  {% if chapter %}
+    <div class="large-6 small-12 columns">
+      <div class="box">
+        <div class="title-area">
+          <h2>Chapter Contributors</h2>
+          <a href="{% url 'books_new_chapter_contributor' book.pk chapter.pk %}" class="button"><i class="fa fa-plus">&nbsp;</i>Add Contributor</a>
+        </div>
+        <div class="content">
+          {% include "books/partials/chapter_contributors.html" %}
+        </div>
+      </div>
+      <div class="box">
+        <div class="title-area">
+          <h2>Chapter Formats</h2>
+          <a href="{% url 'books_new_chapter_format' book.pk chapter.pk %}" class="button"><i class="fa fa-plus">&nbsp;</i>Add Format</a>
+        </div>
+        <div class="content">
+          {% if chapter_formats %}
+            <table class="scroll small">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>File</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for fmt in chapter_formats %}
+                  <tr>
+                    <td>{{ fmt.title }}</td>
+                    <td>{{ fmt.filename }}</td>
+                    <td><a href="{% url 'books_edit_chapter_format' book.pk chapter.pk fmt.pk %}" class="button tiny">Edit</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p>No formats added yet.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="box">
+        <div class="title-area">
+          <h2>Delete Chapter</h2>
+        </div>
+        <div class="content">
+          <p>Delete this chapter using the button below. Please not you cannot recover this chapter once you delete it.</p>
+        <form method="POST">
+          {% csrf_token %}
+          <button name="delete" value="{{ chapter.pk }}" class="warning button">Delete chapter</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+
 {% endblock %}
+
+{% block js %}
+{% include "books/partials/htmx_reorder_js.html" %}
+{% endblock js %}

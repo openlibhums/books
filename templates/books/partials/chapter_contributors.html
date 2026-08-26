@@ -1,0 +1,40 @@
+<ul class="list-group" id="chapter-contributors">
+  {% csrf_token %}
+  {% for link in contributor_links %}
+  <li class="list-group-item">
+    <div class="reorder-item">
+      <span>{{ link.contributor }}</span>
+      <div class="reorder-buttons tiny float-right">
+        <a
+          class="button tiny"
+          href="{% url 'books_edit_chapter_contributor' book.pk chapter.pk link.contributor.pk %}"
+        >
+          Edit
+        </a>
+        {% if not forloop.first %}
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_chapter_contributor' book.pk chapter.pk link.id 'up' %}"
+          hx-target="#chapter-contributors"
+          hx-swap="innerHTML"
+        >
+          Up
+        </button>
+        {% endif %}
+        {% if not forloop.last %}
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_chapter_contributor' book.pk chapter.pk link.id 'down' %}"
+          hx-target="#chapter-contributors"
+          hx-swap="innerHTML"
+        >
+          Down
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </li>
+  {% empty %}
+  <li class="list-group-item list-group-item-info">No contributors assigned to this chapter</li>
+  {% endfor %}
+</ul>

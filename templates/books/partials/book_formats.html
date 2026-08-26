@@ -1,0 +1,36 @@
+<ul class="list-group" id="book-formats">
+  {% csrf_token %}
+  {% for format in formats %}
+  <li class="list-group-item">
+    <div class="reorder-item">
+      <span>
+        <a href="{% url 'books_edit_format' book.pk format.pk %}">{{ format }}</a>
+      </span>
+      <div class="reorder-buttons tiny float-right">
+        {% if not forloop.first %}
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_format' book.pk format.pk 'up' %}"
+          hx-target="#book-formats"
+          hx-swap="innerHTML"
+        >
+          Up
+        </button>
+        {% endif %}
+        {% if not forloop.last %}
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_format' book.pk format.pk 'down' %}"
+          hx-target="#book-formats"
+          hx-swap="innerHTML"
+        >
+          Down
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </li>
+  {% empty %}
+  <li class="list-group-item list-group-item-info">No formats</li>
+  {% endfor %}
+</ul>

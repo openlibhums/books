@@ -1,0 +1,37 @@
+<script>
+    document.body.addEventListener('htmx:configRequest', function(event) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        if (csrfToken) {
+            event.detail.headers['X-CSRFToken'] = csrfToken;
+        }
+    });
+    toastr.options.preventDuplicates = true;
+    toastr.options.newestOnTop = true;
+    toastr.options.maxOpened = 1;
+    document.body.addEventListener('showMessage', function(event) {
+        toastr.clear();
+        toastr.success(event.detail.value);
+    });
+    document.body.addEventListener('htmx:responseError', function(event) {
+        toastr.clear();
+        toastr.error('Failed to update order.');
+    });
+
+    // Disable list buttons while a request is in flight to block double-clicks.
+    function reorderButtons(triggeringElement) {
+        const list = triggeringElement.closest('ul.list-group');
+        return list ? list.querySelectorAll('button') : [];
+    }
+    document.body.addEventListener('htmx:beforeRequest', function(event) {
+        reorderButtons(event.detail.elt).forEach(function(button) {
+            button.disabled = true;
+        });
+    });
+    document.body.addEventListener('htmx:afterRequest', function(event) {
+        if (!event.detail.successful) {
+            reorderButtons(event.detail.elt).forEach(function(button) {
+                button.disabled = false;
+            });
+        }
+    });
+</script>

@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from plugins.books import models, forms, files, logic
 from core import files as core_files
-from utils import setting_handler
+from repository import models as repository_models
 
 
 def index(request, category_slug=None):
@@ -27,13 +27,13 @@ def index(request, category_slug=None):
             models.Category,
             slug=category_slug,
         )
-        books = books.filter(category=category)
+        books = books.filter(categories=category)
 
     template = 'books/{}/index.html'.format(request.press.theme)
     context = {
         'books': books,
         'category': category,
-        'book_settings': models.BookSetting.objects.first(),
+        'book_settings': logic.get_book_settings(),
     }
 
     return render(request, template, context)
@@ -49,6 +49,7 @@ def view_book(request, book_id):
     template = 'books/{}/book.html'.format(request.press.theme)
     context = {
         'book': book,
+        'book_settings': logic.get_book_settings(),
     }
 
     return render(request, template, context)
@@ -106,11 +107,39 @@ def download_chapter(request, book_id, chapter_id, mark_download='yes'):
         book=book,
     )
 
+    chapter_format = models.ChapterFormat.objects.filter(chapter=chapter).first()
+    if not chapter_format:
+        raise Http404
+
     if mark_download == 'yes':
         chapter.add_book_access(request, 'download')
 
-    # Handle serving the file here
-    return files.server_chapter_file(chapter)
+    return files.serve_chapter_format_file(chapter_format)
+
+
+def download_chapter_format(request, book_id, chapter_id, chapter_format_id, mark_download='yes'):
+    request.session.save()
+
+    book = get_object_or_404(
+        models.Book,
+        pk=book_id,
+        date_published__isnull=False,
+    )
+    chapter = get_object_or_404(
+        models.Chapter,
+        pk=chapter_id,
+        book=book,
+    )
+    chapter_format = get_object_or_404(
+        models.ChapterFormat,
+        pk=chapter_format_id,
+        chapter=chapter,
+    )
+
+    if mark_download == 'yes':
+        chapter.add_book_access(request, 'download')
+
+    return files.serve_chapter_format_file(chapter_format)
 
 
 @staff_member_required
@@ -142,40 +171,103 @@ def edit_book(request, book_id=None):
 
             return redirect(reverse('books_admin'))
 
+    contributor_links = []
+    formats = []
+    chapters = []
+    if book:
+        contributor_links = models.ContributorLink.objects.filter(
+            book=book,
+        ).order_by('order')
+        formats = models.Format.objects.filter(book=book).order_by('sequence')
+        chapters = models.Chapter.objects.filter(book=book).order_by('sequence')
+
     template = 'books/edit_book.html'
     context = {
         'book': book,
         'form': form,
+        'contributor_links': contributor_links,
+        'formats': formats,
+        'chapters': chapters,
     }
 
     return render(request, template, context)
 
 
 @staff_member_required()
-def edit_contributor(request, book_id, contributor_id=None):
+def edit_contributor(request, book_id, contributor_id=None, chapter_id=None):
     contributor = None
     book = get_object_or_404(models.Book, pk=book_id)
+    chapter = None
+
+    if chapter_id:
+        chapter = get_object_or_404(
+            models.Chapter,
+            pk=chapter_id,
+            book=book,
+        )
 
     if contributor_id:
-        contributor = get_object_or_404(models.Contributor, pk=contributor_id, book=book)
+        if chapter:
+            contributor = get_object_or_404(
+                models.Contributor,
+                pk=contributor_id,
+                contributorlink__chapter=chapter,
+            )
+        else:
+            contributor = get_object_or_404(
+                models.Contributor,
+                pk=contributor_id,
+                contributorlink__book=book,
+            )
 
-    form = forms.ContributorForm(instance=contributor, book=book)
+    if chapter:
+        return_url = reverse(
+            'books_edit_chapter',
+            kwargs={'book_id': book.pk, 'chapter_id': chapter.pk},
+        )
+    else:
+        return_url = reverse(
+            'books_edit_book',
+            kwargs={'book_id': book.pk},
+        )
+
+    form = forms.ContributorForm(instance=contributor)
 
     if request.POST:
-        form = forms.ContributorForm(request.POST, instance=contributor, book=book)
+        if contributor and "delete" in request.POST:
+            logic.remove_contributor(contributor, book=book, chapter=chapter)
+            messages.success(request, 'Contributor removed.')
+            return redirect(return_url)
+        form = forms.ContributorForm(request.POST, request.FILES, instance=contributor)
 
         if form.is_valid():
-            form_contributor = form.save(commit=False)
-            form_contributor.book = book
-            form_contributor.save()
+            form_contributor = form.save()
 
-            return redirect(reverse('books_edit_book', kwargs={'book_id': book.pk}))
+            if not contributor:
+                # New contributor: link to the chapter when editing in a
+                # chapter context, otherwise to the book.
+                if chapter:
+                    models.ContributorLink.objects.create(
+                        contributor=form_contributor,
+                        chapter=chapter,
+                        order=chapter.get_next_contributor_order(),
+                    )
+                else:
+                    models.ContributorLink.objects.create(
+                        contributor=form_contributor,
+                        book=book,
+                        order=book.get_next_contributor_order(),
+                    )
+
+            return redirect(return_url)
 
     template = 'books/edit_contributor.html'
     context = {
         'book': book,
+        'chapter': chapter,
         'contributor': contributor,
         'form': form,
+        'return_url': return_url,
     }
 
     return render(request, template, context)
@@ -184,14 +276,31 @@ def edit_contributor(request, book_id, contributor_id=None):
 @staff_member_required
 def edit_format(request, book_id, format_id=None):
     book_format = None
-    book = get_object_or_404(models.Book, pk=book_id)
+    book = get_object_or_404(
+        models.Book,
+        pk=book_id,
+    )
 
     if format_id:
-        book_format = get_object_or_404(models.Format, pk=format_id, book=book)
+        book_format = get_object_or_404(
+            models.Format,
+            pk=format_id,
+            book=book,
+        )
 
     form = forms.FormatForm(instance=book_format)
 
     if request.POST:
+        if book_format and "delete" in request.POST:
+            book_format.delete()
+            messages.success(request, 'Format deleted.')
+            return redirect(
+                reverse(
+                    'books_edit_book',
+                    kwargs={'book_id': book.pk},
+                )
+            )
+
         form = forms.FormatForm(request.POST, request.FILES, instance=book_format)
         if form.is_valid():
             form_format = form.save(commit=False)
@@ -204,6 +313,50 @@ def edit_format(request, book_id, format_id=None):
     context = {
         'book': book,
         'format': book_format,
+        'form': form,
+    }
+
+    return render(request, template, context)
+
+
+@staff_member_required
+def edit_chapter_format(request, book_id, chapter_id, chapter_format_id=None):
+    book = get_object_or_404(models.Book, pk=book_id)
+    chapter = get_object_or_404(models.Chapter, pk=chapter_id, book=book)
+    chapter_format = None
+
+    if chapter_format_id:
+        chapter_format = get_object_or_404(
+            models.ChapterFormat,
+            pk=chapter_format_id,
+            chapter=chapter,
+        )
+
+    form = forms.ChapterFormatForm(instance=chapter_format)
+
+    if request.POST:
+        if chapter_format and 'delete' in request.POST:
+            chapter_format.delete()
+            messages.success(request, 'Chapter format deleted.')
+            return redirect(
+                reverse('books_edit_chapter', kwargs={'book_id': book.pk, 'chapter_id': chapter.pk})
+            )
+
+        form = forms.ChapterFormatForm(request.POST, request.FILES, instance=chapter_format)
+        if form.is_valid():
+            saved_format = form.save(commit=False)
+            saved_format.chapter = chapter
+            saved_format.save()
+            messages.success(request, 'Chapter format saved.')
+            return redirect(
+                reverse('books_edit_chapter', kwargs={'book_id': book.pk, 'chapter_id': chapter.pk})
+            )
+
+    template = 'books/edit_chapter_format.html'
+    context = {
+        'book': book,
+        'chapter': chapter,
+        'chapter_format': chapter_format,
         'form': form,
     }
 
@@ -269,19 +422,26 @@ def import_books_process(request, uuid):
         return redirect(reverse('books_import_preview', kwargs={'uuid': uuid}))
 
 
-@staff_member_required
-def export_onix_xml(request, book_id=None):
-    books = models.Book.objects.all()
+def export_onix_xml(
+    request,
+    book_id=None,
+):
+    # Get the books based on the optional book_id parameter
+    books = models.Book.objects.all() if book_id is None else models.Book.objects.filter(pk=book_id)
 
-    if book_id:
-        books = models.Book.objects.filter(pk=book_id)
-
+    # Use an ONIX-compliant XML template
     template = 'books/onix.xml'
     context = {
         'books': books,
+        'chapters': models.Chapter.objects.filter(book__in=books),
+        'contributors': models.Contributor.objects.filter(contributorlink__book__in=books).distinct(),
     }
 
-    return render(request, template, context)
+    xml_content = render(request, template, context).content
+    return HttpResponse(
+        xml_content,
+        content_type='application/xml',
+    )
 
 
 @staff_member_required
@@ -370,6 +530,16 @@ def books_chapter(request, book_id, chapter_id=None):
     )
 
     if request.POST:
+        if chapter and "delete" in request.POST:
+            chapter.delete()
+            messages.success(request, 'Chapter deleted.')
+            return redirect(
+                reverse(
+                    'books_edit_book',
+                    kwargs={'book_id': book.pk},
+                )
+            )
+
         form = forms.ChapterForm(
             request.POST,
             request.FILES,
@@ -377,8 +547,8 @@ def books_chapter(request, book_id, chapter_id=None):
             items=logic.get_chapter_contributor_items(book),
         )
         if form.is_valid():
-            form.save(book=book)
-            form.save_m2m()
+            saved_chapter = form.save(book=book)
+            form.save_chapter_contributors(saved_chapter)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -392,11 +562,23 @@ def books_chapter(request, book_id, chapter_id=None):
                 )
             )
 
+    contributor_links = []
+    chapter_formats = []
+    if chapter:
+        contributor_links = models.ContributorLink.objects.filter(
+            chapter=chapter,
+        ).order_by('order')
+        chapter_formats = models.ChapterFormat.objects.filter(
+            chapter=chapter,
+        ).order_by('sequence')
+
     template = 'books/chapter.html'
     context = {
         'form': form,
         'book': book,
         'chapter': chapter,
+        'contributor_links': contributor_links,
+        'chapter_formats': chapter_formats,
     }
 
     return render(request, template, context)
@@ -414,12 +596,15 @@ def view_chapter(request, book_id, chapter_id):
     chapter = get_object_or_404(models.Chapter, pk=chapter_id)
 
     template = 'books/view_chapter.html'
+    if request.press.theme == 'OLH':
+        template = 'books/OLH/view_chapter.html'
     context = {
         'book': book,
         'chapter': chapter,
     }
 
     return render(request, template, context)
+
 
 @staff_member_required
 def categories(request, category_id=None):
@@ -474,7 +659,6 @@ def categories(request, category_id=None):
                 )
             )
 
-
     template = 'books/categories.html'
     context = {
         'categories': all_categories,
@@ -482,3 +666,69 @@ def categories(request, category_id=None):
     }
 
     return render(request, template, context)
+
+
+@staff_member_required
+def book_preprint_management_view(
+    request,
+    book_id,
+):
+    """Manage linked preprints for a given book."""
+    book = get_object_or_404(
+        models.Book,
+        id=book_id,
+    )
+
+    # Fetch linked preprints through the BookPreprint model
+    linked_preprints = models.BookPreprint.objects.filter(
+        book=book,
+    ).order_by('order')
+
+    # Fetch available preprints that are not already linked
+    available_preprints = repository_models.Preprint.objects.exclude(
+        id__in=linked_preprints.values_list('preprint_id', flat=True),
+    )
+
+    # Initialize the form for adding a new preprint
+    form = forms.PreprintSelectionForm(
+        request.POST or None,
+        available_preprints=available_preprints,
+    )
+
+    if request.method == 'POST' and 'preprint_id' in request.POST:
+        # Handle linking a new preprint
+        if form.is_valid():
+            preprint = form.cleaned_data['preprint_id']
+
+            # Create a new BookPreprint entry with the next available order
+            max_order = models.BookPreprint.objects.filter(
+                book=book,
+            ).count()
+
+            models.BookPreprint.objects.create(
+                book=book,
+                preprint=preprint,
+                order=max_order,
+            )
+
+            messages.success(
+                request,
+                'Preprint linked to book.',
+            )
+            return redirect(
+                'book_preprint_management',
+                book_id=book.id,
+            )
+
+    context = {
+        'book': book,
+        'linked_preprints': linked_preprints,
+        'available_preprints': available_preprints,
+        'form': form,
+    }
+
+    return render(
+        request,
+        'books/book_preprint_manager.html',
+        context,
+    )

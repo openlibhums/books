@@ -1,0 +1,12 @@
+{% load fqdn %}
+
+{% if linked_books %}
+  <h2>Linked Books</h2>
+  <ul>
+    {% for book in linked_books %}
+      <li>
+        <a href="{{ book.url }}">{{ book.title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}

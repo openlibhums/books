@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from plugins.books import views
+from plugins.books import views, partial_views
 
 urlpatterns = [
     re_path(r'^$', views.index, name='books_index'),
@@ -15,6 +15,11 @@ urlpatterns = [
     re_path(r'^(?P<book_id>\d+)/format/(?P<chapter_id>\d+)/download/$',
         views.download_chapter,
         name='books_download_chapter'),
+    re_path(
+        r'^(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/format/(?P<chapter_format_id>\d+)/download/$',
+        views.download_chapter_format,
+        name='books_download_chapter_format',
+    ),
 
     re_path(r'^admin/$', views.admin, name='books_admin'),
     re_path(r'^admin/categories/$', views.categories, name='books_categories'),
@@ -33,6 +38,26 @@ urlpatterns = [
     re_path(r'^admin/edit/(?P<book_id>\d+)/chapter/edit/(?P<chapter_id>\d+)/$',
         views.books_chapter,
         name='books_edit_chapter'),
+    re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/contributor/$',
+        views.edit_contributor,
+        name='books_new_chapter_contributor',
+    ),
+    re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/contributor/(?P<contributor_id>\d+)$',
+        views.edit_contributor,
+        name='books_edit_chapter_contributor',
+    ),
+    re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/format/new/$',
+        views.edit_chapter_format,
+        name='books_new_chapter_format',
+    ),
+    re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/format/(?P<chapter_format_id>\d+)/$',
+        views.edit_chapter_format,
+        name='books_edit_chapter_format',
+    ),
 
     re_path(r'^admin/import/$', views.import_books_upload, name='books_import_books_upload'),
     re_path(r'^admin/import/(?P<uuid>.+)/process/$', views.import_books_process, name='books_import_process'),
@@ -43,4 +68,54 @@ urlpatterns = [
 
     re_path(r'^onix/export/$', views.export_onix_xml, name='books_export_onix_xml'),
     re_path(r'^onix/export/(?P<book_id>\d+)/$', views.export_onix_xml, name='books_export_onix_xml_book'),
+    re_path(
+        r'^admin/(?P<book_id>\d+)/manage-preprints/$',
+        views.book_preprint_management_view,
+        name='book_preprint_management',
+    ),
+
+    # Partial URLs for HTMX
+    re_path(
+        r'^books/(?P<book_id>\d+)/preprint/(?P<book_preprint_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_preprint,
+        name='books_move_preprint',
+    ),
+    re_path(
+        r'^books/(?P<book_id>\d+)/preprint/(?P<book_preprint_id>\d+)/remove/$',
+        partial_views.remove_preprint,
+        name='books_remove_preprint',
+    ),
+
+    # Contributor name fields toggle
+    re_path(
+        r'^admin/contributor/name-fields/$',
+        partial_views.contributor_name_fields,
+        name='books_contributor_name_fields',
+    ),
+
+    # Contributor reorder
+    re_path(
+        r'^books/(?P<book_id>\d+)/contributor/(?P<contributor_link_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_book_contributor,
+        name='books_move_contributor',
+    ),
+    re_path(
+        r'^books/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/contributor/(?P<contributor_link_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_chapter_contributor,
+        name='books_move_chapter_contributor',
+    ),
+
+    # Format reorder
+    re_path(
+        r'^books/(?P<book_id>\d+)/format/(?P<format_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_format,
+        name='books_move_format',
+    ),
+
+    # Chapter reorder
+    re_path(
+        r'^books/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/move/(?P<direction>up|down)/$',
+        partial_views.move_chapter,
+        name='books_move_chapter',
+    ),
 ]

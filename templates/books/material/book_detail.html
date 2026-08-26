@@ -12,8 +12,8 @@
                 {% include "books/material/oa_header.html" %}
             {% else %}
                 <h2>{% if books %}<a href="{% url 'books_book' book.pk %}">{% endif %}{{ book.full_title }}{% if books %}</a>{% endif %}</h2>
-                <h6><em>{% for contributor in book.contributor_set.all %}{% if not forloop.first and not forloop.last %},
-                {% elif forloop.last and not forloop.first %} & {% endif %}{{ contributor }}{% endfor %}</em></h6>
+                <h6><em>{% for contributor in book.contributors.all %}{% if not forloop.first and not forloop.last %},
+                {% elif forloop.last and not forloop.first %} & {% endif %}{% if contributor.bio or contributor.headshot %}<a class="modal-trigger" href="#contributor-modal-{{ contributor.pk }}">{{ contributor }}</a>{% else %}{{ contributor }}{% endif %}{% endfor %}</em></h6>
             {% endif %}
 
             {% if book.remote_url and book.remote_book_label %}
@@ -26,13 +26,13 @@
 
             {% if book.purchase_url %}
                 <a href="{{ book.purchase_url }}" class="waves-effect waves-light btn" target="_blank">
-                    {% if book.category %}{{ book.category.buy_button_text }}{% else %}Buy this Book{% endif %}
+                    {% with cat=book.categories.first %}{% if cat %}{{ cat.buy_button_text }}{% else %}Buy this Book{% endif %}{% endwith %}
                     <span class="fa fa-external-link" aria-hidden="true"></span>
                 </a>
             {% endif %}
-            {% if book.category %}
-                <h3>Category</h3>
-                <p><a href="{% url 'books_index_category' book.category.slug %}">{{ book.category.name }}</a></p>
+            {% if book.categories.exists %}
+                <h3>{% if book.categories.count == 1 %}Category{% else %}Categories{% endif %}</h3>
+                <p>{% for cat in book.categories.all %}<a href="{% url 'books_index_category' cat.slug %}">{{ cat.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
             {% endif %}
             <h3>Description</h3>
             {{ book.description|safe }}
@@ -63,6 +63,10 @@
         {% endif %}
     </div>
 </div>
+
+{% with contributors=book.contributors.all %}
+  {% include "books/partials/contributor_modal_material.html" %}
+{% endwith %}
 
 {% block css %}
 <style>

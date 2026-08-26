@@ -1,9 +1,12 @@
 import csv
+import json
 
 from plugins.books import models
 from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
+from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
 
@@ -13,6 +16,31 @@ def get_first_day(dt, d_years=0, d_months=0):
     y, m = dt.year + d_years, dt.month + d_months
     a, m = divmod(m - 1, 12)
     return date(y+a, m + 1, 1)
+
+
+def remove_contributor(contributor, book=None, chapter=None):
+    """Remove a contributor from a book or chapter by deleting the link.
+
+    The Contributor record itself is only deleted once no links remain,
+    so removing someone from a book does not strip their chapter credits.
+    """
+    links = models.ContributorLink.objects.filter(contributor=contributor)
+    if chapter:
+        links.filter(chapter=chapter).delete()
+    elif book:
+        links.filter(book=book).delete()
+    if not models.ContributorLink.objects.filter(
+        contributor=contributor,
+    ).exists():
+        contributor.delete()
+
+
+def get_book_settings():
+    """Return the singleton BookSetting, creating it if it does not exist."""
+    book_settings = models.BookSetting.objects.first()
+    if not book_settings:
+        book_settings = models.BookSetting.objects.create()
+    return book_settings
 
 
 def get_last_day(dt):
@@ -177,10 +205,54 @@ def export_metrics_by_month(dates, data):
     return response
 
 
-def get_chapter_contributor_items(book):
-    contributors = models.Contributor.objects.filter(
-        book=book,
+def swap_order(item, direction, queryset, order_field='order'):
+    """Swap an item's order with its neighbour, locking rows to avoid races."""
+    with transaction.atomic():
+        # Lock the rows so concurrent reorders (e.g. double-clicks) serialise.
+        objects = list(queryset.select_for_update())
+
+        # Normalise orders to be sequential.
+        for index, obj in enumerate(objects):
+            if getattr(obj, order_field) != index:
+                setattr(obj, order_field, index)
+                obj.save(update_fields=[order_field])
+
+        item.refresh_from_db()
+        current_order = getattr(item, order_field)
+
+        if direction == 'up':
+            target_order = current_order - 1
+        elif direction == 'down':
+            target_order = current_order + 1
+        else:
+            return
+
+        neighbour = next(
+            (obj for obj in objects
+             if getattr(obj, order_field) == target_order),
+            None,
+        )
+        if neighbour:
+            setattr(neighbour, order_field, current_order)
+            neighbour.save(update_fields=[order_field])
+            setattr(item, order_field, target_order)
+            item.save(update_fields=[order_field])
+
+
+def trigger_message(name, direction):
+    """Build a JSON HX-Trigger-After-Swap header value with proper escaping."""
+    return json.dumps(
+        {"showMessage": {"value": "{} moved {}.".format(name, direction)}}
     )
+
+
+def get_chapter_contributor_items(book):
+    # Chapter contributors are not limited to book contributors, so that
+    # edited monographs can credit chapter authors who are not book editors.
+    contributors = models.Contributor.objects.filter(
+        Q(contributorlink__book=book) |
+        Q(contributorlink__chapter__book=book)
+    ).distinct()
     items = list()
     items.append({'object': None, 'cells': ['First Name', 'Last Name', 'Email']})
 

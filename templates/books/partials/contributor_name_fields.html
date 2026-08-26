@@ -1,0 +1,27 @@
+{% if is_corporate %}
+  <div class="row">
+    <div class="large-12 columns">
+      <label for="id_corporate_name">Corporate Name</label>
+      <input type="text" id="id_corporate_name" name="corporate_name">
+    </div>
+  </div>
+{% else %}
+  <div class="row">
+    <div class="large-12 columns">
+      <label for="id_first_name">First Name</label>
+      <input type="text" id="id_first_name" name="first_name">
+    </div>
+  </div>
+  <div class="row">
+    <div class="large-12 columns">
+      <label for="id_middle_name">Middle Name</label>
+      <input type="text" id="id_middle_name" name="middle_name">
+    </div>
+  </div>
+  <div class="row">
+    <div class="large-12 columns">
+      <label for="id_last_name">Last Name</label>
+      <input type="text" id="id_last_name" name="last_name">
+    </div>
+  </div>
+{% endif %}

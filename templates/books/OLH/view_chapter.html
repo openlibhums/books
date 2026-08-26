@@ -1,0 +1,129 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if chapter.number %}[{{ chapter.number }}] {% endif %}{{ chapter.title }}
+{% endblock %}
+
+{% block css %}
+  <link href="{% static "books/books.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+  <section class="content">
+    <div class="row">
+      {% include "books/OLH/breadcrumb.html" %}
+      <div class="olh-book">
+        <div class="book">
+          <div class="row">
+            <div class="medium-4 large-3 columns">
+              {% if book.cover %}
+                <img src="{{ book.cover.url }}" alt="{{ book.title }} book cover"
+                     class="book-cover">
+              {% else %}
+                <img src="{% static 'images/default_cover.jpg' %}"
+                     alt="Default book cover" class="book-cover">
+              {% endif %}
+
+              <p>
+                <a class="button read-button" href="{% url 'books_book' book.pk %}">
+                  <i class="fa fa-arrow-left"></i>&nbsp;Back to {{ book.full_title }}
+                </a>
+              </p>
+            </div>
+
+            <div class="medium-8 large-9 columns book-info">
+              {% if book.categories.exists %}
+                <p class="categories">{% for cat in book.categories.all %}<a href="{% url 'books_index_category' cat.slug %}">{{ cat.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+              {% endif %}
+
+              <h2 class="book-title">
+                {% if chapter.number %}{{ chapter.number }}. {% endif %}{{ chapter.title }}
+              </h2>
+
+              {% if chapter.contributors.exists %}
+                <p class="authors">
+                  {% for contributor in chapter.contributors.all %}{% if contributor.bio or contributor.headshot %}<a data-open="contributor-modal-{{ contributor.pk }}">{{ contributor }}</a>{% else %}{{ contributor }}{% endif %}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                </p>
+              {% endif %}
+
+              <p class="chapter-parent">
+                This {% with cat=book.categories.first %}{% if cat %}{{ cat.chapter_name }}{% else %}chapter{% endif %}{% endwith %}
+                is part of: {{ book.citation|safe }}
+              </p>
+
+              <div class="button-group">
+                {% with cat=book.categories.first %}
+                  {% for fmt in chapter.chapterformat_set.all %}
+                    <a href="{% url 'books_download_chapter_format' book.pk chapter.pk fmt.pk %}"
+                       class="button read-button">
+                      <i class="fa fa-download"></i>&nbsp;
+                      Download {% if cat %}{{ cat.chapter_name|capfirst }}{% else %}Chapter{% endif %}{% if chapter.chapterformat_set.count > 1 %}: {{ fmt.title }}{% endif %}
+                    </a>
+                  {% endfor %}
+                {% endwith %}
+              </div>
+
+              {% if chapter.description %}
+                <div class="section">
+                  <h3 class="section-title">Description</h3>
+                  <div class="description-content" id="description-content">
+                    {{ chapter.description|safe }}
+                  </div>
+                  <a href="#" class="toggle-description" id="toggle-description">Read
+                    more</a>
+                </div>
+              {% endif %}
+
+              <div class="section">
+                <h3 class="section-title">Publication Details</h3>
+                <p><span class="label-text">Published:</span>
+                  {{ book.date_published|date:"F j, Y" }}</p>
+                <p><span class="label-text">Publisher:</span> {{ book.publisher_name }}
+                </p>
+                {% if chapter.pages %}
+                  <p><span class="label-text">Pages:</span> {{ chapter.pages }}</p>
+                {% endif %}
+                {% if chapter.doi %}
+                  <p><span class="label-text">DOI:</span> {{ chapter.doi }}</p>
+                {% endif %}
+                {% if chapter.license_information or book.license_information %}
+                  <p><span class="label-text">License Information:</span>
+                    {% if chapter.license_information %}
+                      {{ chapter.license_information|safe }}
+                    {% else %}
+                      {{ book.license_information|safe }}
+                    {% endif %}
+                  </p>
+                {% endif %}
+              </div>
+
+              <div class="section">
+                <h3 class="section-title">Citation</h3>
+                <p>{{ chapter.citation|safe }}</p>
+              </div>
+
+              {% if chapter.publisher_notes.exists %}
+                <div class="section">
+                  <h3 class="section-title">Publisher Notes</h3>
+                  {% for note in chapter.publisher_notes.all %}
+                    <p>{{ note.note|safe }}</p>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% with contributors=chapter.contributors.all %}
+  {% include "books/partials/contributor_modal_olh.html" %}
+{% endwith %}
+
+{% block js %}
+  {% include "books/OLH/read_more.js" %}
+{% endblock %}

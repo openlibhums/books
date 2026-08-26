@@ -1,0 +1,36 @@
+<ul class="list-group" id="book-chapters">
+  {% csrf_token %}
+  {% for chapter in chapters %}
+  <li class="list-group-item">
+    <div class="reorder-item">
+      <span>
+        <a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{% if chapter.number %}[{{ chapter.number }}]{% endif %} {{ chapter.title }}</a>
+      </span>
+      <div class="reorder-buttons tiny float-right">
+        {% if not forloop.first %}
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_chapter' book.pk chapter.pk 'up' %}"
+          hx-target="#book-chapters"
+          hx-swap="innerHTML"
+        >
+          Up
+        </button>
+        {% endif %}
+        {% if not forloop.last %}
+        <button
+          class="button tiny"
+          hx-post="{% url 'books_move_chapter' book.pk chapter.pk 'down' %}"
+          hx-target="#book-chapters"
+          hx-swap="innerHTML"
+        >
+          Down
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </li>
+  {% empty %}
+  <li class="list-group-item list-group-item-info">No chapters</li>
+  {% endfor %}
+</ul>

@@ -8,7 +8,8 @@
   {{ block.super }}
   <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
   <li><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></li>
-  <li>Edit Format</li>
+  <li><a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{{ chapter.title }}</a></li>
+  <li>{% if chapter_format %}Edit Format{% else %}Add Format{% endif %}</li>
 {% endblock %}
 
 {% block body %}
@@ -16,42 +17,37 @@
     <div class="large-6 small-12 columns">
       <div class="box">
         <div class="title-area">
-          <h2>{% if contributor %}Editing {{ format }}{% else %}Adding Format to
-            {{ book }}{% endif %}</h2>
-          <a href="{% url 'books_edit_book' book.pk %}" class="button"><i
-                  class="fa fa-arrow-left">&nbsp;</i>Back</a>
+          <h2>{% if chapter_format %}Editing {{ chapter_format }}{% else %}Adding Format to {{ chapter.title }}{% endif %}</h2>
+          <a href="{% url 'books_edit_chapter' book.pk chapter.pk %}" class="button"><i class="fa fa-arrow-left">&nbsp;</i>Back</a>
         </div>
         <div class="content">
           {% include "elements/forms/errors.html" %}
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form|foundation }}
-            <div class="large-12 columns">
-              <p>{% if format.filename %}Current File:
-                <a href="{% url 'books_download_format' book.pk format.pk %}"><i
-                        class="fa fa-download">&nbsp;</i>{{ format.filename }}
-                </a>{% endif %}
-              </p>
-            </div>
+            {% if chapter_format.filename %}
+              <div class="large-12 columns">
+                <p>Current File: {{ chapter_format.filename }}</p>
+              </div>
+            {% endif %}
             <button class="success button" name="submit">Save</button>
           </form>
         </div>
       </div>
     </div>
-    {% if format %}
+    {% if chapter_format %}
     <div class="large-6 small-12 columns">
       <div class="box">
         <div class="title-area">
           <h2>Delete Format</h2>
         </div>
-        <p>Delete this format using the button below. Please not you cannot recover this format once you delete it.</p>
+        <p>Delete this format using the button below. You cannot recover it once deleted.</p>
         <form method="POST">
           {% csrf_token %}
-          <button name="delete" value="{{ format.pk }}" class="warning button">Delete format</button>
+          <button name="delete" value="{{ chapter_format.pk }}" class="warning button">Delete format</button>
         </form>
       </div>
     </div>
     {% endif %}
   </div>
-
 {% endblock %}

@@ -1,0 +1,23 @@
+<nav aria-label="Breadcrumb" role="navigation">
+  <ul class="breadcrumbs">
+    <li><a href="{% url 'books_index' %}">Book List</a></li>
+
+    {% if book %}
+      {% for cat in book.categories.all %}
+        <li>
+          <a href="{% url 'books_index_category' category_slug=cat.slug %}">
+            {{ cat.name }}
+          </a>
+        </li>
+      {% endfor %}
+
+      <li>
+        <span>{{ book.full_title }}</span>
+      </li>
+    {% else %}
+      {% if category %}
+        <li><span>{{ category.name }}</span></li>
+      {% endif %}
+    {% endif %}
+  </ul>
+</nav>
