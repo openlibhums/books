@@ -6,6 +6,7 @@ from datetime import date, timedelta, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
 
@@ -15,6 +16,23 @@ def get_first_day(dt, d_years=0, d_months=0):
     y, m = dt.year + d_years, dt.month + d_months
     a, m = divmod(m - 1, 12)
     return date(y+a, m + 1, 1)
+
+
+def remove_contributor(contributor, book=None, chapter=None):
+    """Remove a contributor from a book or chapter by deleting the link.
+
+    The Contributor record itself is only deleted once no links remain,
+    so removing someone from a book does not strip their chapter credits.
+    """
+    links = models.ContributorLink.objects.filter(contributor=contributor)
+    if chapter:
+        links.filter(chapter=chapter).delete()
+    elif book:
+        links.filter(book=book).delete()
+    if not models.ContributorLink.objects.filter(
+        contributor=contributor,
+    ).exists():
+        contributor.delete()
 
 
 def get_book_settings():
@@ -229,7 +247,12 @@ def trigger_message(name, direction):
 
 
 def get_chapter_contributor_items(book):
-    contributors = book.contributors.all()
+    # Chapter contributors are not limited to book contributors, so that
+    # edited monographs can credit chapter authors who are not book editors.
+    contributors = models.Contributor.objects.filter(
+        Q(contributorlink__book=book) |
+        Q(contributorlink__chapter__book=book)
+    ).distinct()
     items = list()
     items.append({'object': None, 'cells': ['First Name', 'Last Name', 'Email']})
 

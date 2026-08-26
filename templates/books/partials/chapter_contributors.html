@@ -5,6 +5,12 @@
     <div class="reorder-item">
       <span>{{ link.contributor }}</span>
       <div class="reorder-buttons tiny float-right">
+        <a
+          class="button tiny"
+          href="{% url 'books_edit_chapter_contributor' book.pk chapter.pk link.contributor.pk %}"
+        >
+          Edit
+        </a>
         {% if not forloop.first %}
         <button
           class="button tiny"

@@ -586,6 +586,14 @@ class Chapter(models.Model):
             self.book.title,
         )
 
+    def get_next_contributor_order(self):
+        last_link = ContributorLink.objects.filter(
+            chapter=self,
+        ).order_by('-order').first()
+        if last_link:
+            return last_link.order + 1
+        return 1
+
     def add_book_access(self, request, access_type='download'):
         try:
             user_agent = parse_ua_string(request.META.get('HTTP_USER_AGENT', None))

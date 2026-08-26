@@ -8,6 +8,9 @@
   {{ block.super }}
   <li><a href="{% url 'books_admin' %}">Books Admin</a></li>
   <li><a href="{% url 'books_edit_book' book.pk %}">{{ book.title }}</a></li>
+  {% if chapter %}
+    <li><a href="{% url 'books_edit_chapter' book.pk chapter.pk %}">{{ chapter.title }}</a></li>
+  {% endif %}
   <li>Edit Contributor</li>
 {% endblock %}
 
@@ -21,8 +24,8 @@
       <div class="box">
         <div class="title-area">
           <h2>{% if contributor %}Editing {{ contributor }}{% else %}Adding Contributor
-            to {{ book }}{% endif %}</h2>
-          <a href="{% url 'books_edit_book' book.pk %}" class="button"><i
+            to {% if chapter %}{{ chapter.title }}{% else %}{{ book }}{% endif %}{% endif %}</h2>
+          <a href="{{ return_url }}" class="button"><i
                   class="fa fa-arrow-left">&nbsp;</i>Back</a>
         </div>
         <div class="content">
@@ -56,12 +59,12 @@
     <div class="large-6 small-12 columns">
       <div class="box">
         <div class="title-area">
-          <h2>Delete Contributor</h2>
+          <h2>Remove Contributor</h2>
         </div>
-        <p>Delete this contributor using the button below. Please note you cannot recover this contributor once you delete it.</p>
+        <p>Remove this contributor from the {% if chapter %}chapter{% else %}book{% endif %} using the button below. The contributor record is deleted once it is no longer linked to any book or chapter.</p>
         <form method="POST">
           {% csrf_token %}
-          <button name="delete" value="{{ contributor.pk }}" class="warning button">Delete Contributor</button>
+          <button name="delete" value="{{ contributor.pk }}" class="warning button">Remove Contributor</button>
         </form>
       </div>
     </div>

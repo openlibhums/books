@@ -39,6 +39,16 @@ urlpatterns = [
         views.books_chapter,
         name='books_edit_chapter'),
     re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/contributor/$',
+        views.edit_contributor,
+        name='books_new_chapter_contributor',
+    ),
+    re_path(
+        r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/contributor/(?P<contributor_id>\d+)$',
+        views.edit_contributor,
+        name='books_edit_chapter_contributor',
+    ),
+    re_path(
         r'^admin/edit/(?P<book_id>\d+)/chapter/(?P<chapter_id>\d+)/format/new/$',
         views.edit_chapter_format,
         name='books_new_chapter_format',

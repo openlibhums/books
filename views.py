@@ -194,49 +194,80 @@ def edit_book(request, book_id=None):
 
 
 @staff_member_required()
-def edit_contributor(request, book_id, contributor_id=None):
+def edit_contributor(request, book_id, contributor_id=None, chapter_id=None):
     contributor = None
     book = get_object_or_404(models.Book, pk=book_id)
+    chapter = None
+
+    if chapter_id:
+        chapter = get_object_or_404(
+            models.Chapter,
+            pk=chapter_id,
+            book=book,
+        )
 
     if contributor_id:
-        contributor = get_object_or_404(
-            models.Contributor,
-            pk=contributor_id,
-            contributorlink__book=book,
+        if chapter:
+            contributor = get_object_or_404(
+                models.Contributor,
+                pk=contributor_id,
+                contributorlink__chapter=chapter,
+            )
+        else:
+            contributor = get_object_or_404(
+                models.Contributor,
+                pk=contributor_id,
+                contributorlink__book=book,
+            )
+
+    if chapter:
+        return_url = reverse(
+            'books_edit_chapter',
+            kwargs={'book_id': book.pk, 'chapter_id': chapter.pk},
+        )
+    else:
+        return_url = reverse(
+            'books_edit_book',
+            kwargs={'book_id': book.pk},
         )
 
     form = forms.ContributorForm(instance=contributor)
 
     if request.POST:
         if contributor and "delete" in request.POST:
-            contributor.delete()
-            messages.success(request, 'Contributor deleted.')
-            return redirect(
-                reverse(
-                    'books_edit_book',
-                    kwargs={'book_id': book.pk},
-                )
-            )
+            logic.remove_contributor(contributor, book=book, chapter=chapter)
+            messages.success(request, 'Contributor removed.')
+            return redirect(return_url)
         form = forms.ContributorForm(request.POST, request.FILES, instance=contributor)
 
         if form.is_valid():
             form_contributor = form.save()
 
             if not contributor:
-                # New contributor: create a ContributorLink to the book
-                models.ContributorLink.objects.create(
-                    contributor=form_contributor,
-                    book=book,
-                    order=book.get_next_contributor_order(),
-                )
+                # New contributor: link to the chapter when editing in a
+                # chapter context, otherwise to the book.
+                if chapter:
+                    models.ContributorLink.objects.create(
+                        contributor=form_contributor,
+                        chapter=chapter,
+                        order=chapter.get_next_contributor_order(),
+                    )
+                else:
+                    models.ContributorLink.objects.create(
+                        contributor=form_contributor,
+                        book=book,
+                        order=book.get_next_contributor_order(),
+                    )
 
-            return redirect(reverse('books_edit_book', kwargs={'book_id': book.pk}))
+            return redirect(return_url)
 
     template = 'books/edit_contributor.html'
     context = {
         'book': book,
+        'chapter': chapter,
         'contributor': contributor,
         'form': form,
+        'return_url': return_url,
     }
 
     return render(request, template, context)

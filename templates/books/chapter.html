@@ -39,6 +39,7 @@
       <div class="box">
         <div class="title-area">
           <h2>Chapter Contributors</h2>
+          <a href="{% url 'books_new_chapter_contributor' book.pk chapter.pk %}" class="button"><i class="fa fa-plus">&nbsp;</i>Add Contributor</a>
         </div>
         <div class="content">
           {% include "books/partials/chapter_contributors.html" %}
