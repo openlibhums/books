@@ -33,7 +33,7 @@ def index(request, category_slug=None):
     context = {
         'books': books,
         'category': category,
-        'book_settings': models.BookSetting.objects.first(),
+        'book_settings': logic.get_book_settings(),
     }
 
     return render(request, template, context)
@@ -49,7 +49,7 @@ def view_book(request, book_id):
     template = 'books/{}/book.html'.format(request.press.theme)
     context = {
         'book': book,
-        'book_settings': models.BookSetting.objects.first(),
+        'book_settings': logic.get_book_settings(),
     }
 
     return render(request, template, context)

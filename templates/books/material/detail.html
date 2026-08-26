@@ -29,6 +29,14 @@
             <td colspan="100">{{ book.language }}</td>
         </tr>
     {% endif %}
+    {% if book_settings.display_review_status %}
+        <tr>
+            <th colspan="100">Peer Reviewed</th>
+        </tr>
+        <tr>
+            <td colspan="100">{% if book.peer_reviewed %}Yes{% else %}No{% endif %}</td>
+        </tr>
+    {% endif %}
     {% if book.license_information %}
         <tr>
             <th colspan="100">License Information</th>

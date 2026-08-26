@@ -17,6 +17,14 @@ def get_first_day(dt, d_years=0, d_months=0):
     return date(y+a, m + 1, 1)
 
 
+def get_book_settings():
+    """Return the singleton BookSetting, creating it if it does not exist."""
+    book_settings = models.BookSetting.objects.first()
+    if not book_settings:
+        book_settings = models.BookSetting.objects.create()
+    return book_settings
+
+
 def get_last_day(dt):
     return get_first_day(dt, 0, 1) + timedelta(-1)
 
