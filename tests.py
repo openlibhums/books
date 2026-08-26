@@ -358,3 +358,16 @@ class PeerReviewDisplayTests(TestCase):
         book_settings.save()
         response = self.client.get(self.url, SERVER_NAME=self.press.domain)
         self.assertNotContains(response, 'Peer Reviewed')
+
+    def test_peer_review_status_shown_in_material_theme(self):
+        self.press.theme = 'material'
+        self.press.save()
+        try:
+            book_settings = logic.get_book_settings()
+            book_settings.display_review_status = True
+            book_settings.save()
+            response = self.client.get(self.url, SERVER_NAME=self.press.domain)
+            self.assertContains(response, 'Peer Reviewed')
+        finally:
+            self.press.theme = 'OLH'
+            self.press.save()
