@@ -1,10 +1,10 @@
 PLUGIN_NAME = 'Books Plugin'
 DESCRIPTION = 'This plugin supports the publication of books in Janeway.'
 AUTHOR = 'Andy Byers'
-VERSION = '1.3.4'
+VERSION = '1.4.0'
 SHORT_NAME = 'books'
 MANAGER_URL = 'books_admin'
-JANEWAY_VERSION = "1.3.5"
+JANEWAY_VERSION = "1.7.0"
 
 from utils import models
 
