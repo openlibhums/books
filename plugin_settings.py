@@ -1,7 +1,7 @@
 PLUGIN_NAME = 'Books Plugin'
 DESCRIPTION = 'This plugin supports the publication of books in Janeway.'
 AUTHOR = 'Andy Byers'
-VERSION = '1.4.0'
+VERSION = '1.4.1'
 SHORT_NAME = 'books'
 MANAGER_URL = 'books_admin'
 JANEWAY_VERSION = "1.7.0"
